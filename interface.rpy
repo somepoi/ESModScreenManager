@@ -37,7 +37,7 @@ init python:
         default_mouse = "default"
         # Две строчки сверху - замена курсора
         config.main_menu_music = (
-            "mods/my_mod/music/main_menu.mp3"  # Вставьте ваш путь до музыки в главном меню.
+            "interface/music/main_menu.mp3"  # Вставьте ваш путь до музыки в главном меню.
         )
 
 
