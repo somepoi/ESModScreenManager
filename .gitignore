@@ -1,0 +1,284 @@
+# Ren'Py .gitignore
+# For Ren'Py visual novel projects
+
+# ============================================================================
+# Ren'Py Generated Files
+# ============================================================================
+
+# Compiled Python files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Ren'Py cache and compiled files
+*.rpyc
+*.rpymc
+*.rpyb
+
+# Ren'Py save files
+saves/
+*.save
+
+# Ren'Py persistent data
+persistent
+
+# Ren'Py screenshots
+screenshots/
+
+# Ren'Py log files
+log.txt
+errors.txt
+traceback.txt
+
+# Ren'Py temporary files
+tmp/
+cache/
+
+# ============================================================================
+# Build and Distribution
+# ============================================================================
+
+# Build output directories
+build/
+dist/
+*.app
+*.dmg
+*.exe
+*.apk
+*.zip
+*.tar.gz
+*.tar.bz2
+
+# Android build files
+.android.json
+android.keystore
+rapt/
+rapt-*/
+
+# iOS build files
+ios-*/
+*.ipa
+
+# Web build files
+web-*/
+
+# ============================================================================
+# IDE and Editor Files
+# ============================================================================
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# PyCharm / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Atom
+.atom/
+
+# Vim
+*.swp
+*.swo
+*~
+.*.sw?
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ============================================================================
+# Operating System Files
+# ============================================================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================================================
+# Version Control
+# ============================================================================
+
+# Git
+.git/
+.gitattributes
+
+# SVN
+.svn/
+
+# Mercurial
+.hg/
+.hgignore
+
+# ============================================================================
+# Ren'Py Specific
+# ============================================================================
+
+# Ren'Py launcher files (if project is inside Ren'Py SDK)
+renpy/
+lib/
+templates/
+launcher/
+tutorial/
+the_question/
+
+# Ren'Py update files
+update/
+*.update
+
+# Ren'Py backup files
+*.bak
+*.backup
+
+# Ren'Py auto-generated files
+game/bytecode.rpyb
+game/presplash.png
+
+# Ren'Py Android/iOS specific
+game/.android.json
+game/android.txt
+game/ios.txt
+
+# ============================================================================
+# Development and Testing
+# ============================================================================
+
+# Test files
+test/
+tests/
+*_test.rpy
+*_test.py
+
+# Development notes
+TODO.txt
+NOTES.txt
+dev_notes/
+
+# Temporary files
+*.tmp
+*.temp
+
+# ============================================================================
+# Assets (Optional - Uncomment if needed)
+# ============================================================================
+
+# Uncomment these if you don't want to track large asset files
+# or if you use Git LFS for them
+
+# Images
+# *.png
+# *.jpg
+# *.jpeg
+# *.gif
+# *.bmp
+# *.webp
+# *.psd
+# *.ai
+
+# Audio
+# *.mp3
+# *.ogg
+# *.wav
+# *.flac
+# *.m4a
+
+# Video
+# *.mp4
+# *.webm
+# *.avi
+# *.mov
+# *.mkv
+
+# Fonts
+# *.ttf
+# *.otf
+# *.woff
+# *.woff2
+
+# ============================================================================
+# Project Specific (Customize as needed)
+# ============================================================================
+
+# Sensitive information
+secrets.rpy
+config_local.rpy
+*.key
+*.pem
+*.p12
+
+# Large files that shouldn't be in repo
+# game/images/videos/
+# game/audio/voice/
+
+# Work in progress
+wip/
+drafts/
+
+# Old versions
+old/
+archive/
+backup/
+
+# ============================================================================
+# Documentation (Optional)
+# ============================================================================
+
+# Uncomment if you don't want to track documentation builds
+# docs/_build/
+# docs/.doctrees/
+
+# ============================================================================
+# Dependencies (if using external tools)
+# ============================================================================
+
+# Python virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Node modules (if using web tools)
+node_modules/
+package-lock.json
+yarn.lock
+
+# ============================================================================
+# Miscellaneous
+# ============================================================================
+
+# Compressed files
+*.7z
+*.rar
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Configuration files with sensitive data
+.env
+.env.local
