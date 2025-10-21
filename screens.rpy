@@ -1,9 +1,7 @@
-# Объединённый файл кастомных экранов
-# Содержит все экраны интерфейса для мода
+# Пример кастомных экранов
 
 init python:
-    # Цветовые схемы для разных времён суток
-    color_schemes = {
+    interface_color_schemes = {
         'day': {
             'bg': '#87CEEB',
             'box': '#F0E68C',
@@ -38,18 +36,14 @@ init python:
         }
     }
     
-    def get_color_scheme():
+    def interface_get_color_scheme():
         timeofday = getattr(persistent, 'timeofday', 'day')
-        return color_schemes.get(timeofday, color_schemes['day'])
+        return interface_color_schemes.get(timeofday, interface_color_schemes['day'])
 
-# ============================================================================
-# ГЛАВНОЕ МЕНЮ
-# ============================================================================
 screen my_mod_main_menu():
     tag menu
     modal True
     
-    # Фон с градиентом
     add Solid("#4169E1")
     
     frame:
@@ -63,7 +57,6 @@ screen my_mod_main_menu():
             xalign 0.5
             yalign 0.5
             
-            # Заголовок
             text "ГЛАВНОЕ МЕНЮ":
                 size 60
                 color "#FFD700"
@@ -73,7 +66,6 @@ screen my_mod_main_menu():
             
             null height 30
             
-            # Кнопки меню
             vbox:
                 spacing 20
                 xalign 0.5
@@ -125,6 +117,18 @@ screen my_mod_main_menu():
                     text_hover_color "#FFFF00"
                     text_xalign 0.5
                     text_yalign 0.5
+
+                textbutton "О МОДЕ":
+                    xsize 500
+                    ysize 60
+                    background Frame(Solid("#696969"), 10, 10)
+                    hover_background Frame(Solid("#808080"), 10, 10)
+                    action ShowMenu('my_mod_help')
+                    text_size 32
+                    text_color "#FFFFFF"
+                    text_hover_color "#FFFF00"
+                    text_xalign 0.5
+                    text_yalign 0.5
                 
                 textbutton "СТАНДАРТНЫЙ ИНТЕРФЕЙС":
                     xsize 500
@@ -150,17 +154,13 @@ screen my_mod_main_menu():
                     text_xalign 0.5
                     text_yalign 0.5
 
-# ============================================================================
-# МЕНЮ В ИГРЕ
-# ============================================================================
 screen my_mod_game_menu_selector():
     tag menu
     modal True
     
     python:
-        scheme = get_color_scheme()
+        scheme = interface_get_color_scheme()
     
-    # Полупрозрачный фон
     button:
         background Solid("#00000080")
         xfill True
@@ -242,27 +242,21 @@ screen my_mod_game_menu_selector():
 
 screen my_mod_quit():
 
-
-
     modal True tag menu
 
-    add get_image("maps/exit.jpg")
+    add "bg black"
 
     text translation_new["Quit_confirm"] style "settings_link" size 60 text_align 0.5 xalign 0.7 yalign 0.33 color "#031a68" antialias True kerning 2
 
     textbutton translation_new["Yes"] text_size 70 style "log_button" text_style "settings_link" xalign 0.51 yalign 0.55 text_color "#3b5bc2" text_hover_color "#ff7b02" action Quit(confirm=False)
     textbutton translation_new["No"] text_size 70 style "log_button" text_style "settings_link" xalign 0.85 yalign 0.55 text_color "#3b5bc2" text_hover_color "#ff7b02" action Return()
 
-# ============================================================================
-# ЭКРАН ВЫБОРА
-# ============================================================================
 screen my_mod_choice(items):
     modal True
     
     python:
-        scheme = get_color_scheme()
+        scheme = interface_get_color_scheme()
     
-    # Полупрозрачный фон
     add Solid("#00000060")
     
     frame:
@@ -299,19 +293,15 @@ screen my_mod_choice(items):
                         bold True
                         text_align 0.5
 
-# ============================================================================
-# ДИАЛОГОВОЕ ОКНО
-# ============================================================================
 screen my_mod_say(who, what, **kwargs):
     
     python:
-        scheme = get_color_scheme()
+        scheme = interface_get_color_scheme()
     
     window:
         id "window"
         background None
         
-        # Диалоговое окно внизу экрана
         frame:
             background Frame(Solid(scheme['box'] + "D0"), 15, 15)
             xpos 100
@@ -323,7 +313,6 @@ screen my_mod_say(who, what, **kwargs):
             vbox:
                 spacing 10
                 
-                # Имя персонажа
                 if who:
                     text who:
                         size 28
@@ -331,7 +320,6 @@ screen my_mod_say(who, what, **kwargs):
                         bold True
                         outlines [(2, "#000000", 0, 0)]
                 
-                # Текст диалога
                 text what:
                     id "what"
                     size 26
@@ -339,7 +327,6 @@ screen my_mod_say(who, what, **kwargs):
                     xmaximum 1660
                     outlines [(1, "#00000080", 0, 0)]
         
-        # Кнопки управления
         hbox:
             xalign 0.98
             yalign 0.98
@@ -405,11 +392,12 @@ screen my_mod_say(who, what, **kwargs):
                     text_yalign 0.5
                     action Skip()
                     tooltip "Пропуск"
+    use my_mod_quick_menu
 
 screen my_mod_nvl(dialogue, items=None):
     
     python:
-        scheme = get_color_scheme()
+        scheme = interface_get_color_scheme()
     
     window:
         background Frame(Solid(scheme['box'] + "E0"), 30, 30)
@@ -519,7 +507,7 @@ screen my_mod_notify(message):
     zorder 100
     
     python:
-        scheme = get_color_scheme()
+        scheme = interface_get_color_scheme()
     
     if not config.skipping:
         frame:
@@ -534,24 +522,15 @@ screen my_mod_notify(message):
                 color scheme['text']
                 xmaximum 400
     else:
-        timer 0.01 action Hide('custom_notify')
-
-# Трансформация для появления уведомлений
-transform notify_appear:
-    on show:
-        alpha 0
-        linear 0.25 alpha 1.0
-    on hide:
-        linear 0.5 alpha 0.0
+        timer 0.01 action Hide('my_mod_notify')
 
 screen my_mod_text_history_screen():
     tag menu
     modal True
     
     python:
-        scheme = get_color_scheme()
+        scheme = interface_get_color_scheme()
     
-    # Фон
     button:
         background Solid("#00000080")
         xfill True
@@ -622,12 +601,11 @@ screen my_mod_text_history_screen():
                 action Return()
                 xalign 0.5
 
-
 screen my_mod_skip_indicator():
     zorder 100
     
     python:
-        scheme = get_color_scheme()
+        scheme = interface_get_color_scheme()
     
     frame:
         background Frame(Solid(scheme['box']), 10, 10)
@@ -663,9 +641,8 @@ screen my_mod_history():
     modal True
     
     python:
-        scheme = get_color_scheme()
+        scheme = interface_get_color_scheme()
     
-    # Полупрозрачный фон
     button:
         background Solid("#00000080")
         xfill True
@@ -683,7 +660,6 @@ screen my_mod_history():
         vbox:
             spacing 20
             
-            # Заголовок
             hbox:
                 xalign 0.5
                 spacing 10
@@ -700,7 +676,6 @@ screen my_mod_history():
             
             null height 10
             
-            # Прокручиваемая область с историей
             viewport:
                 id "history_viewport"
                 xsize 1520
@@ -727,7 +702,6 @@ screen my_mod_history():
                                 hbox:
                                     spacing 20
                                     
-                                    # Имя персонажа
                                     if h.who:
                                         text h.who:
                                             size 28
@@ -738,7 +712,6 @@ screen my_mod_history():
                                     else:
                                         null width 250
                                     
-                                    # Текст диалога (кликабельный для отката)
                                     textbutton h.what:
                                         background None
                                         hover_background Frame(Solid(scheme['button_hover'] + "20"), 5, 5)
@@ -750,7 +723,6 @@ screen my_mod_history():
                                         text_xalign 0.0
                                         text_yalign 0.5
                     else:
-                        # Сообщение если история пуста
                         frame:
                             background Frame(Solid(scheme['button'] + "40"), 10, 10)
                             xalign 0.5
@@ -762,7 +734,6 @@ screen my_mod_history():
                                 color scheme['text']
                                 xalign 0.5
             
-            # Кнопки управления
             hbox:
                 spacing 20
                 xalign 0.5
@@ -819,24 +790,15 @@ screen my_mod_save():
         vbox:
             spacing 15
             
-            # Заголовок
             hbox:
                 xalign 0.5
-                spacing 10
-                add Solid("#FFD700"):
-                    xsize 20
-                    ysize 20
                 text "СОХРАНЕНИЕ":
                     size 48
                     color "#FFFFFF"
                     bold True
-                add Solid("#FFD700"):
-                    xsize 20
-                    ysize 20
             
             null height 10
             
-            # Кнопки действий
             hbox:
                 spacing 20
                 xalign 0.5
@@ -932,7 +894,6 @@ screen my_mod_load():
         vbox:
             spacing 15
             
-            # Заголовок
             hbox:
                 xalign 0.5
                 spacing 10
@@ -977,7 +938,6 @@ screen my_mod_load():
             
             null height 10
             
-            # Слоты сохранений
             viewport:
                 xsize 1540
                 ysize 650
@@ -1045,17 +1005,10 @@ screen my_mod_preferences():
             
             hbox:
                 xalign 0.5
-                spacing 10
-                add Solid("#FFD700"):
-                    xsize 20
-                    ysize 20
                 text "НАСТРОЙКИ":
                     size 48
                     color "#FFFFFF"
                     bold True
-                add Solid("#FFD700"):
-                    xsize 20
-                    ysize 20
             
             null height 20
             
@@ -1151,7 +1104,6 @@ screen my_mod_preferences():
                             thumb Solid("#FFD700")
                             thumb_offset 10
                     
-                    # Громкость звуков
                     vbox:
                         spacing 10
                         
@@ -1169,7 +1121,6 @@ screen my_mod_preferences():
                             thumb Solid("#FFD700")
                             thumb_offset 10
                     
-                    # Скорость текста
                     vbox:
                         spacing 10
                         
@@ -1414,7 +1365,7 @@ screen my_mod_music_room():
                     text_yalign 0.5
                     action Return()
 
-screen my_mod_about():
+screen my_mod_help():
     tag menu
     modal True
     
@@ -1496,7 +1447,7 @@ screen my_mod_quick_menu():
     zorder 100
     
     python:
-        scheme = get_color_scheme()
+        scheme = interface_get_color_scheme()
     
     hbox:
         xalign 0.5

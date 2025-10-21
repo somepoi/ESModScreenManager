@@ -13,7 +13,8 @@ init python:
         "text_history_screen",
         "yesno_prompt",
         "skip_indicator",
-        "history"
+        "history",
+        "help",
     ]
 
     def my_mod_screen_save():  # Функция сохранения экранов из оригинала.

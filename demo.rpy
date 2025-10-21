@@ -31,14 +31,14 @@ label custom_screens_demo:
         
         "Тест меню и навигации":
             jump test_menus
-        
-        "Тест цветовых схем":
-            jump test_color_schemes
-        
+
         "Тест сохранения/загрузки":
             call screen my_mod_save
             jump demo_menu
-        
+
+        "Тест цветовых схем":
+            jump test_color_schemes
+                
         "Выйти из демо":
             return
 
@@ -133,7 +133,7 @@ label test_color_schemes:
         "Вернуться в меню":
             jump demo_menu
     
-    jump demo_menu
+    jump test_color_schemes
 
 label quick_test_all_screens:
     
