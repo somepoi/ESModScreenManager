@@ -59,7 +59,7 @@ init python:
     # Функция для автоматического включения кастомного интерфейса при загрузке сохранения с названием Вашего мода
     def my_mod_activate_after_load():
         global save_name
-        if "MyMod" in save_name:
+        if "my_mod" in save_name:
             my_mod_screen_save()
             my_mod_screen_act()
 

@@ -2,6 +2,8 @@ init:
     $ mods["interface_replace"] = "Замена интерфейса"
 
 label interface_replace:
+    $ save_name = "my_mod"
+
     "Оригинальный интерфейс."
 
     $ my_mod_screen_save()
