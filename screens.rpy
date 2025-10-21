@@ -135,7 +135,7 @@ screen my_mod_main_menu():
                     ysize 60
                     background Frame(Solid("#696969"), 10, 10)
                     hover_background Frame(Solid("#808080"), 10, 10)
-                    action [Function(my_mod_screens_diact), Function(renpy.full_restart)]
+                    action [Function(mod_screen_manager.deactivate_screens), Function(renpy.full_restart)]
                     text_size 32
                     text_color "#FFFFFF"
                     text_hover_color "#FFFF00"
@@ -896,17 +896,10 @@ screen my_mod_load():
             
             hbox:
                 xalign 0.5
-                spacing 10
-                add Solid("#FFD700"):
-                    xsize 20
-                    ysize 20
                 text "ЗАГРУЗКА":
                     size 48
                     color "#FFFFFF"
                     bold True
-                add Solid("#FFD700"):
-                    xsize 20
-                    ysize 20
             
             null height 10
             
@@ -1302,8 +1295,6 @@ screen my_mod_music_room():
         background Frame(Solid("#2F4F4F80"), 20, 20)
         xalign 0.5
         yalign 0.5
-        xsize 1200
-        ysize 800
         padding (40, 40)
         
         vbox:

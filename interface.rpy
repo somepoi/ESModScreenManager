@@ -85,21 +85,36 @@ init python:
             """
             Проверка совместимости с текущей версией Ren'Py.
             
+            Проверяет:
+            - Минимальную версию
+            - Максимальную версию (должна быть < 8.0, т.к. Ren'Py 8 использует Python 3
+                и не поддерживает прямую замену экранов через renpy.display.screen.screens)
+            
             Returns:
                 bool: True если версия совместима, False иначе
             """
             try:
                 current_version = renpy.version_tuple[:2]
                 min_version = tuple(builtins.map(int, self.config.RENPY_MIN_VERSION.split('.')))
+                max_version = (7, 99)  # Любая версия RenPy 7.x
                 
                 if current_version < min_version:
                     self.logger.warning(
-                        u"Версия Ren'Py {} может быть несовместима с модом (требуется {}+)".format(
+                        u"Версия Ren'Py {} слишком старая (требуется {}+)".format(
                             '.'.join(builtins.map(str, current_version)),
                             self.config.RENPY_MIN_VERSION
                         )
                     )
                     return False
+                
+                if current_version >= (8, 0):
+                    self.logger.error(
+                        u"Ren'Py {} не поддерживается! Замена экранов работает только на Ren'Py 7.x".format(
+                            '.'.join(builtins.map(str, current_version))
+                        )
+                    )
+                    return False
+                
                 return True
             except Exception as e:
                 self.logger.error(u"Ошибка проверки совместимости: {}".format(e))
@@ -141,7 +156,6 @@ init python:
                     config.mouse['default'] = self.original_config['mouse']
                     config.main_menu_music = self.original_config['main_menu_music']
                 else:
-                    # Fallback на дефолтные значения
                     config.window_title = self.config.ORIGINAL_TITLE
                     config.mouse['default'] = [(self.config.ORIGINAL_CURSOR_PATH, 0, 0)]
                     config.main_menu_music = self.config.ORIGINAL_MENU_MUSIC
@@ -335,41 +349,8 @@ init python:
                 'total_screens': len(self.config.DEFAULT_SCREENS)
             }
     
-    # ======================== GLOBAL INSTANCE ========================
-    
     # Создаем глобальный экземпляр менеджера
     mod_screen_manager = ModScreenManager()
-    
-    # ======================== COMPATIBILITY FUNCTIONS ========================
-    # Функции для обратной совместимости со старой версией замены интерфейса
-    
-    def my_mod_screen_save():
-        """
-        Устаревшая функция сохранения экранов.
-        Оставлена для обратной совместимости.
-        """
-        return mod_screen_manager.save_screens()
-    
-    def my_mod_screen_act():
-        """
-        Устаревшая функция активации экранов.
-        Оставлена для обратной совместимости.
-        """
-        return mod_screen_manager.activate_screens()
-    
-    def my_mod_screens_diact():
-        """
-        Устаревшая функция деактивации экранов.
-        Оставлена для обратной совместимости.
-        """
-        return mod_screen_manager.deactivate_screens()
-    
-    def my_mod_screens_save_act():
-        """
-        Устаревшая функция сохранения и активации экранов.
-        Оставлена для обратной совместимости.
-        """
-        return mod_screen_manager.activate_screens()
     
     def my_mod_activate_after_load():
         """
@@ -383,47 +364,9 @@ init python:
                 mod_screen_manager.logger.info("Мод активирован после загрузки")
         except NameError:
             # save_name может быть не определен
-            mod_screen_manager.logger.debug("save_name не определен")
+            mod_screen_manager.logger.error("save_name не определен")
         except Exception as e:
             mod_screen_manager.logger.error(u"Ошибка автоактивации: {}".format(e))
     
     # Регистрируем callback для автоматической активации
     config.after_load_callbacks.append(my_mod_activate_after_load)
-    
-    # ======================== UTILITY FUNCTIONS ========================
-    
-    def mod_activate_partial(screen_names):
-        """
-        Активация только определенных экранов.
-        
-        Args:
-            screen_names: Список имен экранов для активации
-        """
-        return mod_screen_manager.activate_screens(screen_names, partial=True)
-    
-    def mod_deactivate_partial(screen_names):
-        """
-        Деактивация только определенных экранов.
-        
-        Args:
-            screen_names: Список имен экранов для деактивации
-        """
-        return mod_screen_manager.deactivate_screens(screen_names)
-    
-    def mod_toggle_screen(screen_name):
-        """
-        Переключение отдельного экрана.
-        
-        Args:
-            screen_name: Имя экрана для переключения
-        """
-        return mod_screen_manager.toggle_screen(screen_name)
-    
-    def mod_get_status():
-        """
-        Получение статуса мода.
-        
-        Returns:
-            dict: Информация о текущем состоянии
-        """
-        return mod_screen_manager.get_status()
