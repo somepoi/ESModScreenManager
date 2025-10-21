@@ -56,8 +56,6 @@ screen my_mod_main_menu():
         background Frame(Solid("#00008B80"), 20, 20)
         xalign 0.5
         yalign 0.5
-        xsize 800
-        ysize 600
         padding (40, 40)
         
         vbox:
@@ -408,9 +406,6 @@ screen my_mod_say(who, what, **kwargs):
                     action Skip()
                     tooltip "Пропуск"
 
-# ============================================================================
-# NVL ДИАЛОГОВОЕ ОКНО
-# ============================================================================
 screen my_mod_nvl(dialogue, items=None):
     
     python:
@@ -468,9 +463,6 @@ screen my_mod_nvl(dialogue, items=None):
                             color scheme['text']
                             bold True
 
-# ============================================================================
-# ПОДТВЕРЖДЕНИЕ ДЕЙСТВИЯ
-# ============================================================================
 screen my_mod_yesno_prompt(message, yes_action, no_action):
     modal True
     
@@ -522,9 +514,6 @@ screen my_mod_yesno_prompt(message, yes_action, no_action):
                     text_xalign 0.5
                     text_yalign 0.5
 
-# ============================================================================
-# УВЕДОМЛЕНИЯ
-# ============================================================================
 screen my_mod_notify(message):
     modal False
     zorder 100
@@ -555,9 +544,6 @@ transform notify_appear:
     on hide:
         linear 0.5 alpha 0.0
 
-# ============================================================================
-# ИСТОРИЯ ТЕКСТА
-# ============================================================================
 screen my_mod_text_history_screen():
     tag menu
     modal True
@@ -583,7 +569,6 @@ screen my_mod_text_history_screen():
         vbox:
             spacing 20
             
-            # Заголовок
             text "ИСТОРИЯ ДИАЛОГОВ":
                 size 42
                 color scheme['text']
@@ -592,7 +577,6 @@ screen my_mod_text_history_screen():
             
             null height 10
             
-            # Прокручиваемая область с историей
             viewport:
                 id "text_history_viewport"
                 xsize 1520
@@ -608,7 +592,6 @@ screen my_mod_text_history_screen():
                         hbox:
                             spacing 20
                             
-                            # Имя персонажа
                             if h.who:
                                 text h.who:
                                     size 26
@@ -618,7 +601,6 @@ screen my_mod_text_history_screen():
                             else:
                                 null width 200
                             
-                            # Текст диалога
                             textbutton h.what:
                                 background None
                                 hover_background None
@@ -628,7 +610,6 @@ screen my_mod_text_history_screen():
                                 text_hover_color scheme['button_hover']
                                 xmaximum 1280
             
-            # Кнопка закрытия
             textbutton "Закрыть":
                 background Solid("#696969")
                 hover_background Solid("#808080")
@@ -642,9 +623,6 @@ screen my_mod_text_history_screen():
                 xalign 0.5
 
 
-# ============================================================================
-# ИНДИКАТОР ПРОПУСКА
-# ============================================================================
 screen my_mod_skip_indicator():
     zorder 100
     
@@ -665,7 +643,6 @@ screen my_mod_skip_indicator():
                 color scheme['text']
                 bold True
             
-            # Анимированные стрелки
             text ">":
                 size 28
                 color scheme['accent']
@@ -681,20 +658,6 @@ screen my_mod_skip_indicator():
                 color scheme['accent']
                 at delayed_blink(0.4, 1.0)
 
-# Трансформация для мигающих стрелок
-transform delayed_blink(delay, cycle):
-    alpha 0.5
-    pause delay
-    block:
-        linear 0.2 alpha 1.0
-        pause 0.2
-        linear 0.2 alpha 0.5
-        pause (cycle - 0.4)
-        repeat
-
-# ============================================================================
-# ЭКРАН ИСТОРИИ (HISTORY)
-# ============================================================================
 screen my_mod_history():
     tag menu
     modal True
@@ -837,9 +800,6 @@ screen my_mod_history():
                     text_yalign 0.5
                     action Return()
 
-# ============================================================================
-# ЭКРАН СОХРАНЕНИЯ
-# ============================================================================
 screen my_mod_save():
     tag menu
     modal True
@@ -905,7 +865,6 @@ screen my_mod_save():
             
             null height 10
             
-            # Слоты сохранений
             viewport:
                 xsize 1540
                 ysize 650
@@ -943,7 +902,6 @@ screen my_mod_save():
                                     color "#CCCCCC"
                                     xalign 0.5
             
-            # Кнопка назад
             textbutton "Назад":
                 background Solid("#696969")
                 hover_background Solid("#808080")
@@ -955,9 +913,6 @@ screen my_mod_save():
                 text_yalign 0.5
                 action Return()
 
-# ============================================================================
-# ЭКРАН ЗАГРУЗКИ
-# ============================================================================
 screen my_mod_load():
     tag menu
     modal True
@@ -994,7 +949,6 @@ screen my_mod_load():
             
             null height 10
             
-            # Кнопки действий
             hbox:
                 spacing 20
                 xalign 0.5
@@ -1061,7 +1015,6 @@ screen my_mod_load():
                                     color "#CCCCCC"
                                     xalign 0.5
             
-            # Кнопка назад
             textbutton "Назад":
                 background Solid("#696969")
                 hover_background Solid("#808080")
@@ -1073,9 +1026,6 @@ screen my_mod_load():
                 text_yalign 0.5
                 action Return()
 
-# ============================================================================
-# ЭКРАН НАСТРОЕК
-# ============================================================================
 screen my_mod_preferences():
     tag menu
     modal True
@@ -1093,7 +1043,6 @@ screen my_mod_preferences():
         vbox:
             spacing 20
             
-            # Заголовок
             hbox:
                 xalign 0.5
                 spacing 10
@@ -1119,7 +1068,6 @@ screen my_mod_preferences():
                 vbox:
                     spacing 30
                     
-                    # Режим окна
                     vbox:
                         spacing 10
                         
@@ -1153,7 +1101,6 @@ screen my_mod_preferences():
                                 text_yalign 0.5
                                 action Preference("display", "window")
                     
-                    # Пропуск текста
                     vbox:
                         spacing 10
                         
@@ -1187,7 +1134,6 @@ screen my_mod_preferences():
                                 text_yalign 0.5
                                 action Preference("skip", "seen")
                     
-                    # Громкость музыки
                     vbox:
                         spacing 10
                         
@@ -1241,7 +1187,6 @@ screen my_mod_preferences():
                             thumb Solid("#FFD700")
                             thumb_offset 10
                     
-                    # Скорость авто-пропуска
                     vbox:
                         spacing 10
                         
@@ -1259,7 +1204,6 @@ screen my_mod_preferences():
                             thumb Solid("#FFD700")
                             thumb_offset 10
             
-            # Кнопка назад
             textbutton "Назад":
                 background Solid("#696969")
                 hover_background Solid("#808080")
@@ -1272,16 +1216,13 @@ screen my_mod_preferences():
                 action Return()
                 xalign 0.0
 
-# ============================================================================
-# ГАЛЕРЕЯ
-# ============================================================================
 screen my_mod_gallery():
     tag menu
     modal True
     
     default page = 0
     default items_per_page = 12
-    default total_items = 24  # Заглушка, можно заменить на реальное количество
+    default total_items = 24  # Заглушка
     
     add Solid("#1C1C1C")
     
@@ -1296,24 +1237,15 @@ screen my_mod_gallery():
         vbox:
             spacing 20
             
-            # Заголовок
             hbox:
                 xalign 0.5
-                spacing 10
-                add Solid("#FFD700"):
-                    xsize 20
-                    ysize 20
                 text "ГАЛЕРЕЯ":
                     size 48
                     color "#FFFFFF"
                     bold True
-                add Solid("#FFD700"):
-                    xsize 20
-                    ysize 20
             
             null height 20
             
-            # Сетка изображений (заглушки)
             grid 4 3:
                 spacing 20
                 xalign 0.5
@@ -1334,7 +1266,6 @@ screen my_mod_gallery():
                             yalign 0.5
                             spacing 10
                             
-                            # Иконка или номер
                             if is_unlocked:
                                 add Solid("#87CEEB"):
                                     xsize 80
@@ -1354,7 +1285,6 @@ screen my_mod_gallery():
                                     color "#808080"
                                     xalign 0.5
             
-            # Навигация
             hbox:
                 spacing 30
                 xalign 0.5
@@ -1392,7 +1322,6 @@ screen my_mod_gallery():
                 else:
                     null width 150
             
-            # Кнопка назад
             textbutton "Вернуться в меню":
                 background Solid("#696969")
                 hover_background Solid("#808080")
@@ -1428,21 +1357,12 @@ screen my_mod_music_room():
         
         vbox:
             spacing 30
-            
-            # Заголовок
             hbox:
                 xalign 0.5
-                spacing 10
-                add Solid("#FFD700"):
-                    xsize 20
-                    ysize 20
                 text "МУЗЫКАЛЬНАЯ КОМНАТА":
                     size 48
                     color "#FFFFFF"
                     bold True
-                add Solid("#FFD700"):
-                    xsize 20
-                    ysize 20
             
             null height 20
             
@@ -1511,7 +1431,7 @@ screen my_mod_about():
         vbox:
             spacing 30
             
-            text "ОБ ИГРЕ":
+            text "О МОДЕ":
                 size 54
                 color "#FFD700"
                 bold True
@@ -1528,12 +1448,12 @@ screen my_mod_about():
                 vbox:
                     spacing 20
                     
-                    text "Название игры:":
+                    text "Название мода:":
                         size 32
                         color "#87CEEB"
                         bold True
                     
-                    text "Кастомная визуальная новелла":
+                    text "Замена интерфейса":
                         size 28
                         color "#FFFFFF"
                     
@@ -1555,19 +1475,7 @@ screen my_mod_about():
                         color "#87CEEB"
                         bold True
                     
-                    text "Это кастомные экраны, созданные только с использованием кода, без внешних изображений и стилей. Все элементы интерфейса нарисованы с помощью заливок Solid, Frame и других примитивов Ren'Py.":
-                        size 28
-                        color "#FFFFFF"
-                        xmaximum 1080
-                    
-                    null height 20
-                    
-                    text "Особенности:":
-                        size 32
-                        color "#87CEEB"
-                        bold True
-                    
-                    text "• Динамические цветовые схемы\n• Адаптивность к времени суток\n• Полностью кодовая реализация\n• Без зависимостей от внешних ресурсов":
+                    text "Заменяет оригинальные экраны БЛ на кастомные.":
                         size 28
                         color "#FFFFFF"
                         xmaximum 1080

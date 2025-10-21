@@ -116,47 +116,24 @@ label test_color_schemes:
         
         "День (Day)":
             $ persistent.timeofday = 'day'
-            "Установлена дневная схема (светлые тона)."
+            "Установлена дневная схема."
         
         "Закат (Sunset)":
             $ persistent.timeofday = 'sunset'
-            "Установлена закатная схема (тёплые оранжевые тона)."
+            "Установлена вечерняя схема."
         
         "Ночь (Night)":
             $ persistent.timeofday = 'night'
-            "Установлена ночная схема (тёмные холодные тона)."
+            "Установлена ночная схема."
         
         "Пролог (Prologue)":
             $ persistent.timeofday = 'prologue'
-            "Установлена схема пролога (серые тона)."
+            "Установлена схема пролога."
         
         "Вернуться в меню":
             jump demo_menu
     
-    menu:
-        "Открыть какое-нибудь меню, чтобы увидеть изменения?"
-        
-        "Да, открыть настройки":
-            call screen my_mod_preferences
-            jump test_color_schemes
-        
-        "Да, открыть игровое меню":
-            call screen my_mod_game_menu_selector
-            jump test_color_schemes
-        
-        "Нет, вернуться":
-            jump demo_menu
-
-label test_custom_screens:
-    
-    # Установка начальных значений
-    $ persistent.timeofday = 'day'
-    
-    # Показываем главное меню (для демо)
-    call screen my_mod_main_menu
-    
-    # Или запускаем демо напрямую
-    jump custom_screens_demo
+    jump demo_menu
 
 label quick_test_all_screens:
     
@@ -198,8 +175,6 @@ label quick_test_all_screens:
         Return(),
         Return()
     )
-    
-    "ВСЕ ТЕСТЫ ЗАВЕРШЕНЫ"
     
     call screen developer_custom_screens_menu()
 
