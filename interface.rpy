@@ -1,6 +1,7 @@
 init python:
     import logging
     from copy import deepcopy
+    import builtins
     
     # ======================== CONFIGURATION ========================
     # Централизованная конфигурация мода для легкой настройки
@@ -10,11 +11,10 @@ init python:
         # Основные параметры
         MOD_NAME = u"Мой мод"  # Название вашего мода
         MOD_SAVE_IDENTIFIER = "MyMod"  # Идентификатор в названии сохранения
-        MOD_VERSION = "1.0.0"  # Версия мода
-        GAME_MIN_VERSION = "7.0"  # Минимальная совместимая версия Ren'Py
+        RENPY_MIN_VERSION = "7.0"  # Минимальная совместимая версия Ren'Py
         
         # Пути к ресурсам
-        MOD_CURSOR_PATH = "images/misc/mouse/1.png"
+        MOD_CURSOR_PATH = "interface/images/1.png"
         MOD_MENU_MUSIC = "interface/music/main_menu.mp3"
         
         # Оригинальные настройки игры
@@ -87,13 +87,13 @@ init python:
             """
             try:
                 current_version = renpy.version_tuple[:2]
-                min_version = tuple(map(int, self.config.GAME_MIN_VERSION.split('.')))
+                min_version = tuple(builtins.map(int, self.config.RENPY_MIN_VERSION.split('.')))
                 
                 if current_version < min_version:
                     self.logger.warning(
                         u"Версия Ren'Py {} может быть несовместима с модом (требуется {}+)".format(
-                            '.'.join(map(str, current_version)),
-                            self.config.GAME_MIN_VERSION
+                            '.'.join(builtins.map(str, current_version)),
+                            self.config.RENPY_MIN_VERSION
                         )
                     )
                     return False
@@ -319,8 +319,7 @@ init python:
             return {
                 'is_active': self.is_active,
                 'active_screens': list(self.active_screens),
-                'total_screens': len(self.config.DEFAULT_SCREENS),
-                'mod_version': self.config.MOD_VERSION
+                'total_screens': len(self.config.DEFAULT_SCREENS)
             }
     
     # ======================== GLOBAL INSTANCE ========================

@@ -8,6 +8,8 @@ default persistent.use_custom_menus = False
 default persistent.developer_mode = False
 
 # ======================== БАЗОВОЕ ИСПОЛЬЗОВАНИЕ ========================
+init:
+    $ mods["mod_start"] = "Замена интерфейса | ВАЙБКОД"
 
 label mod_start:
     # Проверка совместимости перед активацией
@@ -55,32 +57,32 @@ label check_mod_status:
 
 # ======================== НАСТРОЙКА КОНФИГУРАЦИИ ========================
 
-init python:
-    # Создание кастомной конфигурации
-    class MyCustomConfig(ModConfig):
-        # Переопределяем параметры
-        MOD_NAME = u"Мой Супер Мод"
-        MOD_SAVE_IDENTIFIER = "SuperMod"
-        MOD_VERSION = "2.0.0"
+# init python:
+#     # Создание кастомной конфигурации
+#     class MyCustomConfig(ModConfig):
+#         # Переопределяем параметры
+#         MOD_NAME = u"Мой Супер Мод"
+#         MOD_SAVE_IDENTIFIER = "SuperMod"
+#         MOD_VERSION = "2.0.0"
         
-        # Кастомные пути
-        MOD_CURSOR_PATH = "mods/supermod/cursor.png"
-        MOD_MENU_MUSIC = "mods/supermod/music/menu.mp3"
+#         # Кастомные пути
+#         MOD_CURSOR_PATH = "mods/supermod/cursor.png"
+#         MOD_MENU_MUSIC = "mods/supermod/music/menu.mp3"
         
-        # Выбираем только нужные экраны
-        DEFAULT_SCREENS = [
-            "main_menu",
-            "save",
-            "load",
-            "preferences"
-        ]
+#         # Выбираем только нужные экраны
+#         DEFAULT_SCREENS = [
+#             "main_menu",
+#             "save",
+#             "load",
+#             "preferences"
+#         ]
         
-        # Включаем подробное логирование для отладки
-        ENABLE_LOGGING = True
-        LOG_LEVEL = logging.DEBUG
+#         # Включаем подробное логирование для отладки
+#         ENABLE_LOGGING = True
+#         LOG_LEVEL = logging.DEBUG
     
-    # Создаем менеджер с кастомной конфигурацией
-    custom_mod_manager = ModScreenManager(MyCustomConfig)
+#     # Создаем менеджер с кастомной конфигурацией
+#     custom_mod_manager = ModScreenManager(MyCustomConfig)
 
 # ======================== ПРОДВИНУТОЕ ИСПОЛЬЗОВАНИЕ ========================
 
