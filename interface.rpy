@@ -1,72 +1,417 @@
 init python:
-    # Уберите из списка ненужные названия экранов, если не хотите их заменять.
-    MY_MOD_SCREENS = [
-        "main_menu",
-        "game_menu_selector",
-        "quit",
-        "say",
-        "preferences",
-        "save",
-        "load",
-        "nvl",
-        "choice",
-        "text_history_screen",
-        "yesno_prompt",
-        "skip_indicator",
-        "history",
-        "help",
-    ]
-
-    def my_mod_screen_save():  # Функция сохранения экранов из оригинала.
-        for name in MY_MOD_SCREENS:
-            renpy.display.screen.screens[
-                ("my_mod_old_" + name, None)
-            ] = renpy.display.screen.screens[(name, None)]
-
-
-    def my_mod_screen_act():  # Функция замены экранов из оригинала на собственные.
-        config.window_title = u"Мой мод"  # Здесь вводите название Вашего мода.
-        for (
-            name
-        ) in (
-            MY_MOD_SCREENS
-        ):
-            renpy.display.screen.screens[(name, None)] = renpy.display.screen.screens[
-                ("my_mod_" + name, None)
-            ]
-        config.mouse["default"] = [ ("images/misc/mouse/1.png", 0, 0) ]
-        default_mouse = "default"
-        # Две строчки сверху - замена курсора
-        config.main_menu_music = (
-            "interface/music/main_menu.mp3"  # Вставьте ваш путь до музыки в главном меню.
-        )
-
-
-    def my_mod_screens_diact():  # Функция обратной замены.
-        # Пытаемся заменить экраны.
-        try:
-            config.window_title = u"Бесконечное лето"
-            for name in MY_MOD_SCREENS:
-                renpy.display.screen.screens[(name, None)] = renpy.display.screen.screens[
-                    ("my_mod_old_" + name, None)
-                ]
-            config.mouse["default"] = [ ("images/misc/mouse/1.png", 0, 0) ]
-            default_mouse = "default"
-            config.main_menu_music = "sound/music/blow_with_the_fires.ogg"
-        except:  # Если возникают ошибки, то мы выходим из игры, чтобы избежать Traceback
-            renpy.quit()
+    import logging
+    from copy import deepcopy
     
-    # Функция для автоматического включения кастомного интерфейса при загрузке сохранения с названием Вашего мода
-    def my_mod_activate_after_load():
-        global save_name
-        if "MyMod" in save_name:
-            my_mod_screen_save()
-            my_mod_screen_act()
-
-    # Добавляем функцию в Callback
-    config.after_load_callbacks.append(my_mod_activate_after_load)
-
-    # Объединяем функцию сохранения экранов и замены в одну.
+    # ======================== CONFIGURATION ========================
+    # Централизованная конфигурация мода для легкой настройки
+    
+    class ModConfig:
+        """Конфигурация параметров мода."""
+        # Основные параметры
+        MOD_NAME = u"Мой мод"  # Название вашего мода
+        MOD_SAVE_IDENTIFIER = "MyMod"  # Идентификатор в названии сохранения
+        MOD_VERSION = "1.0.0"  # Версия мода
+        GAME_MIN_VERSION = "7.0"  # Минимальная совместимая версия Ren'Py
+        
+        # Пути к ресурсам
+        MOD_CURSOR_PATH = "images/misc/mouse/1.png"
+        MOD_MENU_MUSIC = "interface/music/main_menu.mp3"
+        
+        # Оригинальные настройки игры
+        ORIGINAL_TITLE = u"Бесконечное лето"
+        ORIGINAL_CURSOR_PATH = "images/misc/mouse/1.png"
+        ORIGINAL_MENU_MUSIC = "sound/music/blow_with_the_fires.ogg"
+        
+        # Экраны для замены (удалите ненужные)
+        DEFAULT_SCREENS = [
+            "main_menu",
+            "game_menu_selector",
+            "quit",
+            "say",
+            "preferences",
+            "save",
+            "load",
+            "nvl",
+            "choice",
+            "text_history_screen",
+            "yesno_prompt",
+            "skip_indicator",
+            "history",
+            "help",
+        ]
+        
+        # Настройки логирования
+        ENABLE_LOGGING = True
+        LOG_LEVEL = logging.INFO
+    
+    # ======================== LOGGING SETUP ========================
+    
+    class ModScreenManager:
+        """
+        Менеджер для управления заменой экранов в Ren'Py.
+        
+        Обеспечивает безопасную замену экранов с резервным копированием,
+        обработкой ошибок и поддержкой частичной замены.
+        """
+        
+        def __init__(self, config=ModConfig):
+            """
+            Инициализация менеджера экранов.
+            
+            Args:
+                config: Класс конфигурации с параметрами мода
+            """
+            self.config = config
+            self.original_screens = {}
+            self.original_config = {}
+            self.active_screens = set()
+            self.is_active = False
+            
+            # Настройка логгера
+            self.logger = logging.getLogger('ModScreenManager')
+            if self.config.ENABLE_LOGGING:
+                self.logger.setLevel(self.config.LOG_LEVEL)
+                handler = logging.StreamHandler()
+                formatter = logging.Formatter(
+                    '[%(levelname)s] %(name)s: %(message)s'
+                )
+                handler.setFormatter(formatter)
+                self.logger.addHandler(handler)
+        
+        def check_compatibility(self):
+            """
+            Проверка совместимости с текущей версией Ren'Py.
+            
+            Returns:
+                bool: True если версия совместима, False иначе
+            """
+            try:
+                current_version = renpy.version_tuple[:2]
+                min_version = tuple(map(int, self.config.GAME_MIN_VERSION.split('.')))
+                
+                if current_version < min_version:
+                    self.logger.warning(
+                        u"Версия Ren'Py {} может быть несовместима с модом (требуется {}+)".format(
+                            '.'.join(map(str, current_version)),
+                            self.config.GAME_MIN_VERSION
+                        )
+                    )
+                    return False
+                return True
+            except Exception as e:
+                self.logger.error(u"Ошибка проверки совместимости: {}".format(e))
+                return False
+        
+        def _screen_exists(self, screen_name):
+            """
+            Проверка существования экрана.
+            
+            Args:
+                screen_name: Имя экрана для проверки
+                
+            Returns:
+                bool: True если экран существует
+            """
+            return (screen_name, None) in renpy.display.screen.screens
+        
+        def _backup_config(self):
+            """
+            Создание резервной копии конфигурации игры.
+            """
+            try:
+                self.original_config = {
+                    'window_title': config.window_title,
+                    'mouse': deepcopy(config.mouse.get('default', [])),
+                    'main_menu_music': config.main_menu_music
+                }
+                self.logger.debug("Конфигурация сохранена")
+            except Exception as e:
+                self.logger.error(u"Ошибка сохранения конфигурации: {}".format(e))
+        
+        def _restore_config(self):
+            """
+            Восстановление оригинальной конфигурации игры.
+            """
+            try:
+                if self.original_config:
+                    config.window_title = self.original_config['window_title']
+                    config.mouse['default'] = self.original_config['mouse']
+                    config.main_menu_music = self.original_config['main_menu_music']
+                else:
+                    # Fallback на дефолтные значения
+                    config.window_title = self.config.ORIGINAL_TITLE
+                    config.mouse['default'] = [(self.config.ORIGINAL_CURSOR_PATH, 0, 0)]
+                    config.main_menu_music = self.config.ORIGINAL_MENU_MUSIC
+                    
+                self.logger.debug("Конфигурация восстановлена")
+            except Exception as e:
+                self.logger.error(u"Ошибка восстановления конфигурации: {}".format(e))
+        
+        def _apply_mod_config(self):
+            """
+            Применение конфигурации мода.
+            """
+            try:
+                config.window_title = self.config.MOD_NAME
+                config.mouse['default'] = [(self.config.MOD_CURSOR_PATH, 0, 0)]
+                config.main_menu_music = self.config.MOD_MENU_MUSIC
+                self.logger.debug("Конфигурация мода применена")
+            except Exception as e:
+                self.logger.error(u"Ошибка применения конфигурации мода: {}".format(e))
+        
+        def save_screens(self, screen_names=None):
+            """
+            Сохранение оригинальных экранов.
+            
+            Args:
+                screen_names: Список имен экранов для сохранения.
+                    Если None, сохраняются все экраны из конфигурации.
+            
+            Returns:
+                bool: True если сохранение успешно
+            """
+            if screen_names is None:
+                screen_names = self.config.DEFAULT_SCREENS
+                
+            saved_count = 0
+            for name in screen_names:
+                try:
+                    if self._screen_exists(name):
+                        original_key = (name, None)
+                        backup_key = ("mod_backup_{}".format(name), None)
+                        
+                        # Сохраняем только если еще не сохранен
+                        if original_key not in self.original_screens:
+                            self.original_screens[original_key] = renpy.display.screen.screens[original_key]
+                            renpy.display.screen.screens[backup_key] = renpy.display.screen.screens[original_key]
+                            saved_count += 1
+                            self.logger.debug(u"Экран '{}' сохранен".format(name))
+                    else:
+                        self.logger.warning(u"Экран '{}' не найден".format(name))
+                        
+                except (KeyError, AttributeError) as e:
+                    self.logger.error(u"Ошибка сохранения экрана '{}': {}".format(name, e))
+                    
+            self.logger.info(u"Сохранено {} экранов".format(saved_count))
+            return saved_count > 0
+        
+        def activate_screens(self, screen_names=None, partial=False):
+            """
+            Активация модифицированных экранов.
+            
+            Args:
+                screen_names: Список имен экранов для замены.
+                    Если None, заменяются все экраны из конфигурации.
+                partial: Если True, добавляет экраны к уже активным.
+                    Если False, заменяет все активные экраны.
+            
+            Returns:
+                bool: True если активация успешна
+            """
+            if not self.check_compatibility():
+                self.logger.warning("Проверка совместимости не пройдена")
+                
+            if screen_names is None:
+                screen_names = self.config.DEFAULT_SCREENS
+                
+            # Если не частичная замена, сначала деактивируем все
+            if not partial and self.is_active:
+                self.deactivate_screens()
+                
+            # Сохраняем экраны перед заменой
+            if not self.save_screens(screen_names):
+                self.logger.error("Не удалось сохранить экраны")
+                return False
+                
+            # Сохраняем конфигурацию перед первой активацией
+            if not self.is_active:
+                self._backup_config()
+                
+            activated_count = 0
+            for name in screen_names:
+                try:
+                    mod_screen_name = "my_mod_{}".format(name)
+                    
+                    if self._screen_exists(mod_screen_name):
+                        original_key = (name, None)
+                        mod_key = (mod_screen_name, None)
+                        
+                        renpy.display.screen.screens[original_key] = renpy.display.screen.screens[mod_key]
+                        self.active_screens.add(name)
+                        activated_count += 1
+                        self.logger.debug(u"Экран '{}' активирован".format(name))
+                    else:
+                        self.logger.warning(u"Модифицированный экран '{}' не найден".format(mod_screen_name))
+                        
+                except (KeyError, AttributeError) as e:
+                    self.logger.error(u"Ошибка активации экрана '{}': {}".format(name, e))
+                    
+            if activated_count > 0:
+                self._apply_mod_config()
+                self.is_active = True
+                self.logger.info(u"Активировано {} экранов".format(activated_count))
+                
+            return activated_count > 0
+        
+        def deactivate_screens(self, screen_names=None):
+            """
+            Деактивация модифицированных экранов и восстановление оригиналов.
+            
+            Args:
+                screen_names: Список имен экранов для восстановления.
+                    Если None, восстанавливаются все активные экраны.
+            
+            Returns:
+                bool: True если деактивация успешна
+            """
+            if screen_names is None:
+                screen_names = list(self.active_screens)
+                
+            restored_count = 0
+            for name in screen_names:
+                try:
+                    original_key = (name, None)
+                    backup_key = ("mod_backup_{}".format(name), None)
+                    
+                    if backup_key in renpy.display.screen.screens:
+                        renpy.display.screen.screens[original_key] = renpy.display.screen.screens[backup_key]
+                        self.active_screens.discard(name)
+                        restored_count += 1
+                        self.logger.debug(u"Экран '{}' восстановлен".format(name))
+                    else:
+                        self.logger.warning(u"Резервная копия экрана '{}' не найдена".format(name))
+                        
+                except (KeyError, AttributeError) as e:
+                    self.logger.error(u"Ошибка восстановления экрана '{}': {}".format(name, e))
+                    
+            # Восстанавливаем конфигурацию если все экраны деактивированы
+            if not self.active_screens:
+                self._restore_config()
+                self.is_active = False
+                
+            self.logger.info(u"Восстановлено {} экранов".format(restored_count))
+            return restored_count > 0
+        
+        def toggle_screen(self, screen_name):
+            """
+            Переключение состояния отдельного экрана.
+            
+            Args:
+                screen_name: Имя экрана для переключения
+                
+            Returns:
+                bool: True если экран теперь активен, False если деактивирован
+            """
+            if screen_name in self.active_screens:
+                self.deactivate_screens([screen_name])
+                return False
+            else:
+                self.activate_screens([screen_name], partial=True)
+                return True
+        
+        def get_status(self):
+            """
+            Получение текущего статуса менеджера.
+            
+            Returns:
+                dict: Словарь с информацией о состоянии
+            """
+            return {
+                'is_active': self.is_active,
+                'active_screens': list(self.active_screens),
+                'total_screens': len(self.config.DEFAULT_SCREENS),
+                'mod_version': self.config.MOD_VERSION
+            }
+    
+    # ======================== GLOBAL INSTANCE ========================
+    
+    # Создаем глобальный экземпляр менеджера
+    mod_screen_manager = ModScreenManager()
+    
+    # ======================== COMPATIBILITY FUNCTIONS ========================
+    # Функции для обратной совместимости со старым кодом
+    
+    def my_mod_screen_save():
+        """
+        Устаревшая функция сохранения экранов.
+        Оставлена для обратной совместимости.
+        """
+        return mod_screen_manager.save_screens()
+    
+    def my_mod_screen_act():
+        """
+        Устаревшая функция активации экранов.
+        Оставлена для обратной совместимости.
+        """
+        return mod_screen_manager.activate_screens()
+    
+    def my_mod_screens_diact():
+        """
+        Устаревшая функция деактивации экранов.
+        Оставлена для обратной совместимости.
+        """
+        return mod_screen_manager.deactivate_screens()
+    
     def my_mod_screens_save_act():
-        my_mod_screen_save()
-        my_mod_screen_act()
+        """
+        Устаревшая функция сохранения и активации экранов.
+        Оставлена для обратной совместимости.
+        """
+        return mod_screen_manager.activate_screens()
+    
+    def my_mod_activate_after_load():
+        """
+        Автоматическая активация мода после загрузки сохранения.
+        Активируется если в имени сохранения есть идентификатор мода.
+        """
+        try:
+            global save_name
+            if ModConfig.MOD_SAVE_IDENTIFIER in save_name:
+                mod_screen_manager.activate_screens()
+                mod_screen_manager.logger.info("Мод активирован после загрузки")
+        except NameError:
+            # save_name может быть не определен
+            mod_screen_manager.logger.debug("save_name не определен")
+        except Exception as e:
+            mod_screen_manager.logger.error(u"Ошибка автоактивации: {}".format(e))
+    
+    # Регистрируем callback для автоматической активации
+    config.after_load_callbacks.append(my_mod_activate_after_load)
+    
+    # ======================== UTILITY FUNCTIONS ========================
+    
+    def mod_activate_partial(screen_names):
+        """
+        Активация только определенных экранов.
+        
+        Args:
+            screen_names: Список имен экранов для активации
+        """
+        return mod_screen_manager.activate_screens(screen_names, partial=True)
+    
+    def mod_deactivate_partial(screen_names):
+        """
+        Деактивация только определенных экранов.
+        
+        Args:
+            screen_names: Список имен экранов для деактивации
+        """
+        return mod_screen_manager.deactivate_screens(screen_names)
+    
+    def mod_toggle_screen(screen_name):
+        """
+        Переключение отдельного экрана.
+        
+        Args:
+            screen_name: Имя экрана для переключения
+        """
+        return mod_screen_manager.toggle_screen(screen_name)
+    
+    def mod_get_status():
+        """
+        Получение статуса мода.
+        
+        Returns:
+            dict: Информация о текущем состоянии
+        """
+        return mod_screen_manager.get_status()
