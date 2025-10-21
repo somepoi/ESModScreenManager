@@ -67,16 +67,19 @@ init python:
             self.active_screens = set()
             self.is_active = False
             
-            # Настройка логгера
-            self.logger = logging.getLogger('ModScreenManager')
+            # Настройка логгера с уникальным именем для каждого мода
+            logger_name = u'ModScreenManager [{}]'.format(self.config.MOD_NAME)
+            self.logger = logging.getLogger(logger_name)
             if self.config.ENABLE_LOGGING:
                 self.logger.setLevel(self.config.LOG_LEVEL)
-                handler = logging.StreamHandler()
-                formatter = logging.Formatter(
-                    '[%(levelname)s] %(name)s: %(message)s'
-                )
-                handler.setFormatter(formatter)
-                self.logger.addHandler(handler)
+                # Добавляем handler только если его еще нет (избегаем дублирования логов)
+                if not self.logger.handlers:
+                    handler = logging.StreamHandler()
+                    formatter = logging.Formatter(
+                        '[%(levelname)s] %(name)s: %(message)s'
+                    )
+                    handler.setFormatter(formatter)
+                    self.logger.addHandler(handler)
         
         def check_compatibility(self):
             """
@@ -192,8 +195,12 @@ init python:
                 except (KeyError, AttributeError) as e:
                     self.logger.error(u"Ошибка сохранения экрана '{}': {}".format(name, e))
                     
-            self.logger.info(u"Сохранено {} экранов".format(saved_count))
-            return saved_count > 0
+            # Логируем только если действительно что-то сохранили
+            if saved_count > 0:
+                self.logger.info(u"Сохранено {} экранов".format(saved_count))
+            else:
+                self.logger.debug(u"Все экраны уже были сохранены ранее")
+            return True  # Возвращаем True если нет ошибок, даже если ничего не сохранили
         
         def activate_screens(self, screen_names=None, partial=False):
             """
@@ -213,10 +220,16 @@ init python:
                 
             if screen_names is None:
                 screen_names = self.config.DEFAULT_SCREENS
-                
-            # Если не частичная замена, сначала деактивируем все
-            if not partial and self.is_active:
-                self.deactivate_screens()
+            
+            # Проверяем, не активны ли уже все запрошенные экраны
+            if not partial:
+                requested_set = set(screen_names)
+                if self.is_active and requested_set == self.active_screens:
+                    self.logger.debug(u"Запрошенные экраны уже активны, пропускаем активацию")
+                    return True
+                # Если не частичная замена и активны другие экраны, деактивируем их
+                elif self.is_active:
+                    self.deactivate_screens()
                 
             # Сохраняем экраны перед заменой
             if not self.save_screens(screen_names):
@@ -328,7 +341,7 @@ init python:
     mod_screen_manager = ModScreenManager()
     
     # ======================== COMPATIBILITY FUNCTIONS ========================
-    # Функции для обратной совместимости со старым кодом
+    # Функции для обратной совместимости со старой версией замены интерфейса
     
     def my_mod_screen_save():
         """

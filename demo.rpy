@@ -4,10 +4,6 @@ init:
 label interface_replace:
     "Оригинальный интерфейс."
 
-    $ my_mod_screen_save()
-
-    "Сохранение оригинального интерфейса."
-
     $ my_mod_screen_act()
 
     "Кастомный интерфейс."
