@@ -1,180 +1,233 @@
+init python:
+    # Кастомный конфиг на основе шаблона
+    class CustomConfigForModScreenManager(ModScreenManagerConfig):
+        # Переопределяем параметры
+        MOD_NAME = u"Менеджер экранов"
+        MOD_SAVE_IDENTIFIER = "Тест замены интерфейса с помощью менеджера экранов"
+        
+        # Кастомные пути
+        MOD_CURSOR_PATH = "interface/images/1.png"
+        MOD_MENU_MUSIC = "interface/music/main_menu.mp3"
+        
+        # Выбираем только нужные экраны
+        DEFAULT_SCREENS = [
+            "main_menu",
+            "game_menu_selector",
+            "quit",
+            "say",
+            "preferences",
+            "save",
+            "load",
+            "nvl",
+            "choice",
+            "text_history_screen",
+            "yesno_prompt",
+            "skip_indicator",
+            "history",
+            "help",
+        ]
+        
+        # Включаем подробное логирование для отладки
+        ENABLE_LOGGING = True
+        LOG_LEVEL = logging.DEBUG
 init:
-    $ mods["interface_test"] = u"Тест замены интерфейса"
+    $ mods["mod_screen_manager_init"] = u"Менеджер экранов"
 
 default persistent.timeofday = 'day'
 
-label interface_test:
+label mod_screen_manager_init:
+    # Создаем глобальный экземпляр менеджера с нашим кастомным шаблоном
+    $ my_mod_screen_manager = ModScreenManager(CustomConfigForModScreenManager)
+    
+    # Даём имя сохранению, чтобы при загрузке сейва из нашего мода у нас автоматически включался наш интерфейс.
+    # Важно: проверяем, что в нашем имени сохранения будет присутствовать MOD_SAVE_IDENTIFIER из конфига мода, по нему он проверяем мод, сейв которого мы грузим.
+    # Пример: MOD_SAVE_IDENTIFIER = "Мой мод", значит save_name = "Мой мод. День 1.", "Мой мод начало" или "Старт Мой мод", т.е. чтобы в имени сохранения всегда присутстваол наш индентификатор мода в том регистре, в котором он написан
+    
+    $ save_name = "Тест замены интерфейса с помощью менеджера экранов"
+    # или, если Вы боитесь забыть указание идентификатора мода, то можно сделать так:
+    #$ save_name = MyCustomConfig.MOD_SAVE_IDENTIFIER
+    # если надо добавить ещё какой-то текст для например обозначения дня, то
+    #$ save_name = MyCustomConfig.MOD_SAVE_IDENTIFIER + "Любой текст, который вы хотите"
+    # так он всегда будет в Вашем имени сохранения
+
+    jump mod_screen_manager_test
+
+label mod_screen_manager_test:
     scene bg black
     
-    menu test_main_menu:
-        "{size=+10}{b}СИСТЕМА ЗАМЕНЫ ЭКРАНОВ{/b}{/size}\n\nВыберите режим тестирования:"
+    menu mod_screen_manager_test_main_menu:
+        "{size=+10}{b}МЕНЕДЖЕР ЭКРАНОВ{/b}{/size}\n\nВыберите режим тестирования:"
         
         "1. Управление модом (вкл/выкл)":
-            jump test_mod_control
+            jump mod_screen_manager_test_mod_control
         
         "2. Частичная замена экранов":
-            jump test_partial_replacement
+            jump mod_screen_manager_test_partial_replacement
         
         "3. Тест отдельных экранов":
-            jump test_individual_screens
+            jump mod_screen_manager_test_individual_screens
         
         "4. Быстрый тест всех экранов":
-            jump quick_test_all_screens
+            jump mod_screen_manager_quick_test_all_screens
         
         "5. Диагностика системы":
-            jump test_diagnostics
+            jump mod_screen_manager_test_diagnostics
         
         "6. Демонстрация интерфейса":
-            jump demo_interface
+            jump mod_screen_manager_demo_interface
         
         "Выход":
-            return
+            jump mod_screen_manager_exit
 
-label test_mod_control:
+label mod_screen_manager_exit:
+    $ my_mod_screen_manager.deactivate_screens() # Обязательно отключаем наши экраны при выходе из мода, будь то просто добавив функцию на кнопку выхода или при завершении мода через вызов функции
+    return
+
+label mod_screen_manager_test_mod_control:
     scene bg black
     
     python:
-        status = mod_screen_manager.get_status()
+        status = my_mod_screen_manager.get_status()
         status_text = u"Активен" if status['is_active'] else u"Неактивен"
     
-    menu mod_control_menu:
+    menu mod_screen_manager_mod_control_menu:
         "{b}УПРАВЛЕНИЕ МОДОМ{/b}\n\nТекущий статус: [status_text]"
         
         "Активировать мод (все экраны)":
-            $ result = mod_screen_manager.activate_screens()
+            $ result = my_mod_screen_manager.activate_screens()
             if result:
                 "Мод успешно активирован!"
                 "Все экраны заменены на кастомные."
             else:
                 "Ошибка активации мода!"
-            jump test_mod_control
+            jump mod_screen_manager_test_mod_control
         
         "Деактивировать мод (вернуть оригинал)":
-            $ result = mod_screen_manager.deactivate_screens()
+            $ result = my_mod_screen_manager.deactivate_screens()
             if result:
                 "Мод деактивирован!"
                 "Восстановлены оригинальные экраны."
             else:
                 "Ошибка деактивации!"
-            jump test_mod_control
+            jump mod_screen_manager_test_mod_control
         
         "Проверить совместимость":
-            $ compat = mod_screen_manager.check_compatibility()
+            $ compat = my_mod_screen_manager.check_compatibility()
             if compat:
                 "Версия Ren'Py совместима с модом!"
             else:
                 "ВНИМАНИЕ: Возможны проблемы совместимости!"
-            jump test_mod_control
+            jump mod_screen_manager_test_mod_control
         
         "Назад":
-            jump test_main_menu
+            jump mod_screen_manager_test_main_menu
 
-label test_partial_replacement:
+label mod_screen_manager_test_partial_replacement:
     scene bg black
     
-    menu partial_menu:
+    menu mod_screen_manager_partial_menu:
         "{b}ЧАСТИЧНАЯ ЗАМЕНА ЭКРАНОВ{/b}\n\nВыберите группу экранов:"
         
         "Только диалоговые (say, nvl, choice)":
             $ screens = ["say", "nvl", "choice"]
-            $ result = mod_screen_manager.activate_screens(screens, partial=True)
+            $ result = my_mod_screen_manager.activate_screens(screens, partial=True)
             if result:
                 "Активированы диалоговые экраны!"
                 "Тестируем диалог..."
                 "Это тестовое сообщение в кастомном окне."
-            jump partial_menu
+            jump mod_screen_manager_partial_menu
         
         "Только меню (main_menu, game_menu_selector)":
             $ screens = ["main_menu", "game_menu_selector", "quit"]
-            $ result = mod_screen_manager.activate_screens(screens, partial=True)
+            $ result = my_mod_screen_manager.activate_screens(screens, partial=True)
             if result:
                 "Активированы экраны меню!"
-            jump partial_menu
+            jump mod_screen_manager_partial_menu
         
         "Только сохранение/загрузка":
             $ screens = ["save", "load"]
-            $ result = mod_screen_manager.activate_screens(screens, partial=True)
+            $ result = my_mod_screen_manager.activate_screens(screens, partial=True)
             if result:
                 "Активированы экраны сохранения!"
                 call screen my_mod_save
-            jump partial_menu
+            jump mod_screen_manager_partial_menu
         
         "Переключить экран 'say'":
-            $ is_active = mod_screen_manager.toggle_screen("say")
+            $ is_active = my_mod_screen_manager.toggle_screen("say")
             if is_active:
                 "Экран 'say' активирован!"
             else:
                 "Экран 'say' деактивирован!"
-            jump partial_menu
+            jump mod_screen_manager_partial_menu
         
         "Деактивировать все":
-            $ mod_screen_manager.deactivate_screens()
+            $ my_mod_screen_manager.deactivate_screens()
             "Все экраны деактивированы!"
-            jump partial_menu
+            jump mod_screen_manager_partial_menu
         
         "Назад":
-            jump test_main_menu
+            jump mod_screen_manager_test_main_menu
 
-label test_individual_screens:
+label mod_screen_manager_test_individual_screens:
     scene bg black
     
-    menu individual_screens_menu:
+    menu mod_screen_manager_individual_screens_menu:
         "{b}ТЕСТ ОТДЕЛЬНЫХ ЭКРАНОВ{/b}"
         
         "Главное меню":
             call screen my_mod_main_menu
-            jump individual_screens_menu
+            jump mod_screen_manager_individual_screens_menu
         
         "Игровое меню":
             call screen my_mod_game_menu_selector
-            jump individual_screens_menu
+            jump mod_screen_manager_individual_screens_menu
         
         "Сохранение":
             call screen my_mod_save
-            jump individual_screens_menu
+            jump mod_screen_manager_individual_screens_menu
         
         "Загрузка":
             call screen my_mod_load
-            jump individual_screens_menu
+            jump mod_screen_manager_individual_screens_menu
         
         "Настройки":
             call screen my_mod_preferences
-            jump individual_screens_menu
+            jump mod_screen_manager_individual_screens_menu
         
         "История текста":
             call screen my_mod_text_history_screen
-            jump individual_screens_menu
+            jump mod_screen_manager_individual_screens_menu
         
         "Помощь":
             call screen my_mod_help
-            jump individual_screens_menu
+            jump mod_screen_manager_individual_screens_menu
         
         "Галерея":
             call screen my_mod_gallery
-            jump individual_screens_menu
+            jump mod_screen_manager_individual_screens_menu
         
         "Музыкальная комната":
             call screen my_mod_music_room
-            jump individual_screens_menu
+            jump mod_screen_manager_individual_screens_menu
         
         "Тест диалога":
-            jump test_dialogue
+            jump mod_screen_manager_test_dialogue
         
         "Тест выбора":
-            jump test_choice
+            jump mod_screen_manager_test_choice
         
         "Назад":
-            jump test_main_menu
+            jump mod_screen_manager_test_main_menu
 
-label test_dialogue:
+label mod_screen_manager_test_dialogue:
     scene bg black
     "Это тест диалогового окна."
     "Обратите внимание на дизайн."
     me "Привет! Это сообщение от персонажа."
     "Можно открыть историю (H) или сохранить (S)."
-    jump individual_screens_menu
+    jump mod_screen_manager_individual_screens_menu
 
-label test_choice:
+label mod_screen_manager_test_choice:
     scene bg black
     menu:
         "Выберите вариант:"
@@ -184,13 +237,13 @@ label test_choice:
             "Выбран вариант 2"
         "Длинный вариант текста для проверки переноса строк":
             "Выбран длинный вариант"
-    jump individual_screens_menu
+    jump mod_screen_manager_individual_screens_menu
 
-label quick_test_all_screens:
+label mod_screen_manager_quick_test_all_screens:
     scene bg black
     
     "Начинаем быстрое тестирование..."
-    $ mod_screen_manager.activate_screens()
+    $ my_mod_screen_manager.activate_screens()
     
     "1. Игровое меню..."
     call screen my_mod_game_menu_selector
@@ -217,17 +270,17 @@ label quick_test_all_screens:
     pause 1.0
     
     "Быстрое тестирование завершено!"
-    jump test_main_menu
+    jump mod_screen_manager_test_main_menu
 
-label test_diagnostics:
+label mod_screen_manager_test_diagnostics:
     scene bg black
     
     python:
-        manager = mod_screen_manager
+        manager = my_mod_screen_manager
         status = manager.get_status()
         
         missing_screens = []
-        for screen_name in ModConfig.DEFAULT_SCREENS:
+        for screen_name in CustomConfigForModScreenManager.DEFAULT_SCREENS:
             mod_screen = "my_mod_{}".format(screen_name)
             if not manager._screen_exists(mod_screen):
                 missing_screens.append(screen_name)
@@ -252,27 +305,24 @@ label test_diagnostics:
             for screen in missing_screens:
                 report += u"  - my_mod_{}\n".format(screen)
     
-    "[report]"
-    
-    menu:
-        "Экспортировать в лог?":
-            $ manager.logger.info(u"\n" + report)
-            "Экспортировано!"
-        "Назад":
-            jump test_main_menu
+    $ manager.logger.info(u"\n" + report)
 
-label demo_interface:
-    scene bg black
-    $ mod_screen_manager.activate_screens()
+    "Результат диагностики экспортирован в консоль Ren'Py!"
     
-    menu demo_menu:
+    jump mod_screen_manager_test_main_menu
+
+label mod_screen_manager_demo_interface:
+    scene bg black
+    $ my_mod_screen_manager.activate_screens()
+    
+    menu mod_screen_manager_demo_menu:
         "{b}ДЕМОНСТРАЦИЯ{/b}"
         
         "Тест диалога":
             "Демонстрация диалогового окна."
             me "Привет! Тестовое сообщение."
             "Используйте H для истории, S для сохранения."
-            jump demo_menu
+            jump mod_screen_manager_demo_menu
         
         "Тест выбора":
             menu:
@@ -281,36 +331,36 @@ label demo_interface:
                     "Выбран простой"
                 "С форматированием {b}жирный{/b}":
                     "Форматирование работает!"
-            jump demo_menu
+            jump mod_screen_manager_demo_menu
         
         "Цветовые схемы":
-            jump demo_colors
+            jump mod_screen_manager_demo_colors
         
         "Назад":
-            jump test_main_menu
+            jump mod_screen_manager_test_main_menu
 
-label demo_colors:
-    menu color_menu:
+label mod_screen_manager_demo_colors:
+    menu mod_screen_manager_color_menu:
         "Выберите время суток:"
         
         "День":
             $ persistent.timeofday = 'day'
             "Дневная схема установлена."
-            jump color_menu
+            jump mod_screen_manager_color_menu
         
         "Вечер":
             $ persistent.timeofday = 'sunset'
             "Вечерняя схема установлена."
-            jump color_menu
+            jump mod_screen_manager_color_menu
         
         "Ночь":
             $ persistent.timeofday = 'night'
             "Ночная схема установлена."
-            jump color_menu
+            jump mod_screen_manager_color_menu
         "Пролог":
             $ persistent.timeofday = 'prologue'
             "Прологовая схема установлена."
-            jump color_menu
+            jump mod_screen_manager_color_menu
         
         "Назад":
-            jump demo_menu
+            jump mod_screen_manager_demo_menu

@@ -24,7 +24,7 @@ init python:
     #         formatter = logging.Formatter(log_fmt)
     #         return formatter.format(record)
 
-    class ModConfig:
+    class ModScreenManagerConfig:
         """Конфигурация параметров мода."""
         # Основные параметры
         MOD_NAME = u"Мой мод"  # Название вашего мода
@@ -71,7 +71,7 @@ init python:
         обработкой ошибок и поддержкой частичной замены.
         """
         
-        def __init__(self, config=ModConfig):
+        def __init__(self, config=ModScreenManagerConfig):
             """
             Инициализация менеджера экранов.
             
@@ -84,6 +84,8 @@ init python:
             self.active_screens = set()
             self.is_active = False
             
+            self.activate_screens_after_load()
+
             # логгер
             logger_name = u'ModScreenManager [{}]'.format(self.config.MOD_NAME)
             self.logger = logging.getLogger(logger_name)
@@ -97,7 +99,7 @@ init python:
                     )
                     handler.setFormatter(formatter)
                     self.logger.addHandler(handler)
-        
+
         def check_compatibility(self):
             """
             Проверка совместимости с текущей версией Ren'Py.
@@ -363,25 +365,23 @@ init python:
                 'active_screens': list(self.active_screens),
                 'total_screens': len(self.config.DEFAULT_SCREENS)
             }
-    
-    # Создаем глобальный экземпляр менеджера
-    mod_screen_manager = ModScreenManager()
-    
-    def my_mod_activate_after_load():
-        """
-        Автоматическая активация мода после загрузки сохранения.
-        Активируется если в имени сохранения есть идентификатор мода.
-        """
-        try:
-            global save_name
-            if ModConfig.MOD_SAVE_IDENTIFIER in save_name:
-                mod_screen_manager.activate_screens()
-                mod_screen_manager.logger.info("Мод активирован после загрузки")
-        except NameError:
-            # save_name может быть не определен
-            mod_screen_manager.logger.error("save_name не определен")
-        except Exception as e:
-            mod_screen_manager.logger.error(u"Ошибка автоактивации: {}".format(e))
-    
-    # Регистрируем callback для автоматической активации
-    config.after_load_callbacks.append(my_mod_activate_after_load)
+        
+        def after_load_callback(self):
+            """
+            Автоматическая активация мода после загрузки сохранения.
+            Активируется если в имени сохранения есть идентификатор мода.
+            """
+            try:
+                global save_name
+                if self.config.MOD_SAVE_IDENTIFIER in save_name:
+                    self.activate_screens()
+                    self.logger.info("Мод активирован после загрузки")
+            except NameError:
+                # save_name может быть не определен
+                self.logger.error("save_name не определен")
+            except Exception as e:
+                self.logger.error(u"Ошибка автоактивации: {}".format(e))
+
+        def activate_screens_after_load(self):
+            """Добавляем написанный нами коллбэк в список коллбэков после загрузки сохранения"""
+            config.after_load_callbacks.append(self.after_load_callback)

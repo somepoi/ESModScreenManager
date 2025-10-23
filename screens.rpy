@@ -1,7 +1,7 @@
 # Пример кастомных экранов
 
 init python:
-    interface_color_schemes = {
+    mod_screen_manager_interface_color_schemes = {
         'day': {
             'bg': '#87CEEB',
             'box': '#F0E68C',
@@ -36,9 +36,9 @@ init python:
         }
     }
     
-    def interface_get_color_scheme():
+    def mod_screen_manager_interface_get_color_scheme():
         timeofday = getattr(persistent, 'timeofday', 'day')
-        return interface_color_schemes.get(timeofday, interface_color_schemes['day'])
+        return mod_screen_manager_interface_color_schemes.get(timeofday, mod_screen_manager_interface_color_schemes['day'])
 
 screen my_mod_main_menu():
     tag menu
@@ -135,7 +135,7 @@ screen my_mod_main_menu():
                     ysize 60
                     background Frame(Solid("#696969"), 10, 10)
                     hover_background Frame(Solid("#808080"), 10, 10)
-                    action [Function(mod_screen_manager.deactivate_screens), Function(renpy.full_restart)]
+                    action [Function(my_mod_screen_manager.deactivate_screens), Function(renpy.full_restart)] # Если хотите, чтобы по выходу из Вашего мода отключался Ваш иннтерфейс и возвращался оригинальный, не забудьте в Action кнопки для выхода из мода добавить my_mod_screen_manager.deactivate_screens
                     text_size 32
                     text_color "#FFFFFF"
                     text_hover_color "#FFFF00"
@@ -159,7 +159,7 @@ screen my_mod_game_menu_selector():
     modal True
     
     python:
-        scheme = interface_get_color_scheme()
+        scheme = mod_screen_manager_interface_get_color_scheme()
     
     button:
         background Solid("#00000080")
@@ -255,7 +255,7 @@ screen my_mod_choice(items):
     modal True
     
     python:
-        scheme = interface_get_color_scheme()
+        scheme = mod_screen_manager_interface_get_color_scheme()
     
     add Solid("#00000060")
     
@@ -296,7 +296,7 @@ screen my_mod_choice(items):
 screen my_mod_say(who, what, **kwargs):
     
     python:
-        scheme = interface_get_color_scheme()
+        scheme = mod_screen_manager_interface_get_color_scheme()
     
     window:
         id "window"
@@ -397,7 +397,7 @@ screen my_mod_say(who, what, **kwargs):
 screen my_mod_nvl(dialogue, items=None):
     
     python:
-        scheme = interface_get_color_scheme()
+        scheme = mod_screen_manager_interface_get_color_scheme()
     
     window:
         background Frame(Solid(scheme['box'] + "E0"), 30, 30)
@@ -507,7 +507,7 @@ screen my_mod_notify(message):
     zorder 100
     
     python:
-        scheme = interface_get_color_scheme()
+        scheme = mod_screen_manager_interface_get_color_scheme()
     
     if not config.skipping:
         frame:
@@ -529,7 +529,7 @@ screen my_mod_text_history_screen():
     modal True
     
     python:
-        scheme = interface_get_color_scheme()
+        scheme = mod_screen_manager_interface_get_color_scheme()
     
     button:
         background Solid("#00000080")
@@ -605,7 +605,7 @@ screen my_mod_skip_indicator():
     zorder 100
     
     python:
-        scheme = interface_get_color_scheme()
+        scheme = mod_screen_manager_interface_get_color_scheme()
     
     frame:
         background Frame(Solid(scheme['box']), 10, 10)
@@ -641,7 +641,7 @@ screen my_mod_history():
     modal True
     
     python:
-        scheme = interface_get_color_scheme()
+        scheme = mod_screen_manager_interface_get_color_scheme()
     
     button:
         background Solid("#00000080")
@@ -1438,7 +1438,7 @@ screen my_mod_quick_menu():
     zorder 100
     
     python:
-        scheme = interface_get_color_scheme()
+        scheme = mod_screen_manager_interface_get_color_scheme()
     
     hbox:
         xalign 0.5
