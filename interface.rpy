@@ -1,11 +1,29 @@
 init python:
-    import logging
-    from copy import deepcopy
-    import builtins
+    import logging, builtins
     
-    # ======================== CONFIGURATION ========================
-    # Централизованная конфигурация мода для легкой настройки
-    
+    # На будущее, кастомный форматтер вывода логгера в консоль cmd
+    # Важно: в консоли RenPy цвета фиксированны, т.е. код замены цветов в нём отображается текстом, он не меняет цвет
+    # class CustomFormatter(logging.Formatter):
+
+    #     grey = "\x1b[38;20m"
+    #     yellow = "\x1b[33;20m"
+    #     red = "\x1b[31;20m"
+    #     bold_red = "\x1b[31;1m"
+    #     reset = "\x1b[0m"
+    #     format = "[%(levelname)s] %(name)s: %(message)s"
+
+    #     FORMATS = {
+    #         logging.DEBUG: yellow + format + reset,
+    #         logging.INFO: grey + format + reset,
+    #         logging.WARNING: red + format + reset,
+    #         logging.ERROR: bold_red + format + reset,
+    #     }
+
+    #     def format(self, record):
+    #         log_fmt = self.FORMATS.get(record.levelno)
+    #         formatter = logging.Formatter(log_fmt)
+    #         return formatter.format(record)
+
     class ModConfig:
         """Конфигурация параметров мода."""
         # Основные параметры
@@ -18,6 +36,7 @@ init python:
         MOD_MENU_MUSIC = "interface/music/main_menu.mp3"
         
         # Оригинальные настройки игры
+        # Захардкодил на случай кодеров, что с помощью своих версий скриптов для замены интерфейса меняют их на свои до отработки этого скрипта для замены интерфейса, чтобы точно заменились на стандартные  
         ORIGINAL_TITLE = u"Бесконечное лето"
         ORIGINAL_CURSOR_PATH = "images/misc/mouse/1.png"
         ORIGINAL_MENU_MUSIC = "sound/music/blow_with_the_fires.ogg"
@@ -44,8 +63,6 @@ init python:
         ENABLE_LOGGING = True
         LOG_LEVEL = logging.INFO
     
-    # ======================== LOGGING SETUP ========================
-    
     class ModScreenManager:
         """
         Менеджер для управления заменой экранов в Ren'Py.
@@ -67,12 +84,12 @@ init python:
             self.active_screens = set()
             self.is_active = False
             
-            # Настройка логгера с уникальным именем для каждого мода
+            # логгер
             logger_name = u'ModScreenManager [{}]'.format(self.config.MOD_NAME)
             self.logger = logging.getLogger(logger_name)
             if self.config.ENABLE_LOGGING:
                 self.logger.setLevel(self.config.LOG_LEVEL)
-                # Добавляем handler только если его еще нет (избегаем дублирования логов)
+                # добавляем handler только если его еще нет, чтобы дублирования не было
                 if not self.logger.handlers:
                     handler = logging.StreamHandler()
                     formatter = logging.Formatter(
@@ -139,7 +156,6 @@ init python:
             try:
                 self.original_config = {
                     'window_title': config.window_title,
-                    'mouse': deepcopy(config.mouse.get('default', [])),
                     'main_menu_music': config.main_menu_music
                 }
                 self.logger.debug("Конфигурация сохранена")
@@ -153,11 +169,11 @@ init python:
             try:
                 if self.original_config:
                     config.window_title = self.original_config['window_title']
-                    config.mouse['default'] = self.original_config['mouse']
+                    renpy.config.mouse_displayable = None
                     config.main_menu_music = self.original_config['main_menu_music']
                 else:
                     config.window_title = self.config.ORIGINAL_TITLE
-                    config.mouse['default'] = [(self.config.ORIGINAL_CURSOR_PATH, 0, 0)]
+                    renpy.config.mouse_displayable = None
                     config.main_menu_music = self.config.ORIGINAL_MENU_MUSIC
                     
                 self.logger.debug("Конфигурация восстановлена")
@@ -170,7 +186,7 @@ init python:
             """
             try:
                 config.window_title = self.config.MOD_NAME
-                config.mouse['default'] = [(self.config.MOD_CURSOR_PATH, 0, 0)]
+                renpy.config.mouse_displayable = MouseDisplayable(self.config.MOD_CURSOR_PATH, 0, 0) 
                 config.main_menu_music = self.config.MOD_MENU_MUSIC
                 self.logger.debug("Конфигурация мода применена")
             except Exception as e:
@@ -209,7 +225,6 @@ init python:
                 except (KeyError, AttributeError) as e:
                     self.logger.error(u"Ошибка сохранения экрана '{}': {}".format(name, e))
                     
-            # Логируем только если действительно что-то сохранили
             if saved_count > 0:
                 self.logger.info(u"Сохранено {} экранов".format(saved_count))
             else:
@@ -235,7 +250,7 @@ init python:
             if screen_names is None:
                 screen_names = self.config.DEFAULT_SCREENS
             
-            # Проверяем, не активны ли уже все запрошенные экраны
+            # проверяем, не активны ли уже все запрошенные экраны
             if not partial:
                 requested_set = set(screen_names)
                 if self.is_active and requested_set == self.active_screens:
@@ -245,12 +260,12 @@ init python:
                 elif self.is_active:
                     self.deactivate_screens()
                 
-            # Сохраняем экраны перед заменой
+            # сохраняем экраны перед заменой, чтобы точно никто не забыл сохранить
             if not self.save_screens(screen_names):
                 self.logger.error("Не удалось сохранить экраны")
                 return False
                 
-            # Сохраняем конфигурацию перед первой активацией
+            # сохраняем конфиг перед первой активацией
             if not self.is_active:
                 self._backup_config()
                 
@@ -311,7 +326,7 @@ init python:
                 except (KeyError, AttributeError) as e:
                     self.logger.error(u"Ошибка восстановления экрана '{}': {}".format(name, e))
                     
-            # Восстанавливаем конфигурацию если все экраны деактивированы
+            # восстанавливаем конфиг если все экраны деактивированы
             if not self.active_screens:
                 self._restore_config()
                 self.is_active = False
