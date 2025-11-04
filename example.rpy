@@ -6,8 +6,8 @@ init python:
         MOD_SAVE_IDENTIFIER = "Тест замены интерфейса с помощью менеджера экранов"
         
         # Кастомные пути
-        MOD_CURSOR_PATH = "interface/images/1.png"
-        MOD_MENU_MUSIC = "interface/music/main_menu.mp3"
+        MOD_CURSOR_PATH = "ESModScreenManager/images/1.png"
+        MOD_MENU_MUSIC = "ESModScreenManager/music/main_menu.mp3"
         
         # Выбираем только нужные экраны
         DEFAULT_SCREENS = [

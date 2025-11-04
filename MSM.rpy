@@ -32,8 +32,8 @@ init python:
         RENPY_MIN_VERSION = "7.0"  # Минимальная совместимая версия Ren'Py
         
         # Пути к ресурсам
-        MOD_CURSOR_PATH = "interface/images/1.png"
-        MOD_MENU_MUSIC = "interface/music/main_menu.mp3"
+        MOD_CURSOR_PATH = "ESModScreenManager/images/1.png"
+        MOD_MENU_MUSIC = "ESModScreenManager/music/main_menu.mp3"
         
         # Оригинальные настройки игры
         # Захардкодил на случай кодеров, что с помощью своих версий скриптов для замены интерфейса меняют их на свои до отработки этого скрипта для замены интерфейса, чтобы точно заменились на стандартные  

@@ -1286,7 +1286,7 @@ screen my_mod_music_room():
     
     python:
         music_list = [
-            ("140 kilograms of sex — Incelthread", "interface/music/main_menu.mp3"),
+            ("140 kilograms of sex — Incelthread", "ESModScreenManager/music/main_menu.mp3"),
         ]
     
     add Solid("#1C1C1C")
