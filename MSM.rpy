@@ -1,5 +1,5 @@
 init python:
-    import logging, builtins
+    import builtins
     
     # На будущее, кастомный форматтер вывода логгера в консоль cmd
     # Важно: в консоли RenPy цвета фиксированны, т.е. код замены цветов в нём отображается текстом, он не меняет цвет
@@ -59,9 +59,9 @@ init python:
             "help",
         ]
         
-        # Настройки логирования
+        # логгер
         ENABLE_LOGGING = True
-        LOG_LEVEL = logging.INFO
+        LOG_LEVEL = 20  # INFO
     
     class ModScreenManager:
         """
@@ -88,17 +88,11 @@ init python:
 
             # логгер
             logger_name = u'ModScreenManager [{}]'.format(self.config.MOD_NAME)
-            self.logger = logging.getLogger(logger_name)
-            if self.config.ENABLE_LOGGING:
-                self.logger.setLevel(self.config.LOG_LEVEL)
-                # добавляем handler только если его еще нет, чтобы дублирования не было
-                if not self.logger.handlers:
-                    handler = logging.StreamHandler()
-                    formatter = logging.Formatter(
-                        '[%(levelname)s] %(name)s: %(message)s'
-                    )
-                    handler.setFormatter(formatter)
-                    self.logger.addHandler(handler)
+            self.logger = ModScreenManagerLogger(
+                name=logger_name,
+                level=self.config.LOG_LEVEL if self.config.ENABLE_LOGGING else ModScreenManagerLogger.ERROR + 10,
+                enabled=self.config.ENABLE_LOGGING
+            )
 
         def check_compatibility(self):
             """
