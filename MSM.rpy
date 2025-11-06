@@ -35,7 +35,7 @@ init python:
         MOD_CURSOR_PATH = "ESModScreenManager/images/1.png"
         MOD_MENU_MUSIC = "ESModScreenManager/music/main_menu.mp3"
         
-        # Оригинальные настройки игры
+        # Оригинальные настройки Летонька
         # Захардкодил на случай кодеров, что с помощью своих версий скриптов для замены интерфейса меняют их на свои до отработки этого скрипта для замены интерфейса, чтобы точно заменились на стандартные  
         ORIGINAL_TITLE = u"Бесконечное лето"
         ORIGINAL_CURSOR_PATH = "images/misc/mouse/1.png"
@@ -153,7 +153,7 @@ init python:
         
         def _backup_config(self):
             """
-            Создание резервной копии конфигурации игры.
+            Создание резервной копии конфигурации БЛ.
             """
             try:
                 self.original_config = {
@@ -166,7 +166,7 @@ init python:
         
         def _restore_config(self):
             """
-            Восстановление оригинальной конфигурации игры.
+            Восстановление оригинальной конфигурации БЛ.
             """
             try:
                 if self.original_config:
@@ -373,7 +373,7 @@ init python:
             """
             try:
                 global save_name
-                if self.config.MOD_SAVE_IDENTIFIER in save_name:
+                if (self.config.MOD_SAVE_IDENTIFIER in save_name) or (self.config.MOD_NAME in save_name):
                     self.activate_screens()
                     self.logger.info("Мод активирован после загрузки")
             except NameError:
