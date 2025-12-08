@@ -135,7 +135,7 @@ screen my_mod_main_menu():
                     ysize 60
                     background Frame(Solid("#696969"), 10, 10)
                     hover_background Frame(Solid("#808080"), 10, 10)
-                    action [Function(my_mod_screen_manager.deactivate_screens), Function(renpy.full_restart)] # Если хотите, чтобы по выходу из Вашего мода отключался Ваш иннтерфейс и возвращался оригинальный, не забудьте в Action кнопки для выхода из мода добавить my_mod_screen_manager.deactivate_screens
+                    action [Function(my_mod_screen_manager.deactivate_screens), Function(renpy.full_restart)] # Если хотите, чтобы по выходу из Вашего мода отключался Ваш интерфейс и возвращался оригинальный, не забудьте в Action кнопки для выхода из мода добавить my_mod_screen_manager.deactivate_screens
                     text_size 32
                     text_color "#FFFFFF"
                     text_hover_color "#FFFF00"

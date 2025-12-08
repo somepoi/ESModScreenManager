@@ -1,4 +1,4 @@
-init python:
+init -1 python:
     # Простой логгер для Ren'Py, совместимый с сериализацией
     class ModScreenManagerLogger:
         """
@@ -35,12 +35,12 @@ init python:
             """Внутренний метод для вывода сообщений."""
             if not self.enabled or level < self.level:
                 return
-                
+
             level_name = self.LEVEL_NAMES.get(level, "UNKNOWN")
             formatted_message = u"[{}] {}: {}".format(level_name, self.name, message)
-            
+
             renpy.display.log.write(formatted_message)
-            
+
             # выводим в стандартный вывод для отладки
             try:
                 print(formatted_message.encode('utf-8'))

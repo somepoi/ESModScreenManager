@@ -1,4 +1,4 @@
-init python:
+init -1 python:
     import builtins
     
     # На будущее, кастомный форматтер вывода логгера в консоль cmd
@@ -74,16 +74,15 @@ init python:
         def __init__(self, config=ModScreenManagerConfig):
             """
             Инициализация менеджера экранов.
-            
+
             Args:
                 config: Класс конфигурации с параметрами мода
             """
             self.config = config
-            self.original_screens = {}
             self.original_config = {}
             self.active_screens = set()
             self.is_active = False
-            
+
             self.activate_screens_after_load()
 
             # логгер
@@ -182,7 +181,7 @@ init python:
             """
             try:
                 config.window_title = self.config.MOD_NAME
-                renpy.config.mouse_displayable = MouseDisplayable(self.config.MOD_CURSOR_PATH, 0, 0) 
+                renpy.config.mouse_displayable = MouseDisplayable(self.config.MOD_CURSOR_PATH, 0, 0)
                 config.main_menu_music = self.config.MOD_MENU_MUSIC
                 self.logger.debug("Конфигурация мода применена")
             except Exception as e:
@@ -201,26 +200,25 @@ init python:
             """
             if screen_names is None:
                 screen_names = self.config.DEFAULT_SCREENS
-                
+
             saved_count = 0
             for name in screen_names:
                 try:
                     if self._screen_exists(name):
                         original_key = (name, None)
                         backup_key = ("mod_backup_{}".format(name), None)
-                        
+
                         # Сохраняем только если еще не сохранен
-                        if original_key not in self.original_screens:
-                            self.original_screens[original_key] = renpy.display.screen.screens[original_key]
+                        if backup_key not in renpy.display.screen.screens:
                             renpy.display.screen.screens[backup_key] = renpy.display.screen.screens[original_key]
                             saved_count += 1
                             self.logger.debug(u"Экран '{}' сохранен".format(name))
                     else:
                         self.logger.warning(u"Экран '{}' не найден".format(name))
-                        
+
                 except (KeyError, AttributeError) as e:
                     self.logger.error(u"Ошибка сохранения экрана '{}': {}".format(name, e))
-                    
+
             if saved_count > 0:
                 self.logger.info(u"Сохранено {} экранов".format(saved_count))
             else:
