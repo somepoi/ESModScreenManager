@@ -32,8 +32,8 @@ init -1 python:
         RENPY_MIN_VERSION = "7.0"  # Минимальная совместимая версия Ren'Py
         
         # Пути к ресурсам
-        MOD_CURSOR_PATH = "ESModScreenManager/images/1.png"
-        MOD_MENU_MUSIC = "ESModScreenManager/music/main_menu.mp3"
+        MOD_CURSOR_PATH = False
+        MOD_MENU_MUSIC = False
         
         # Оригинальные настройки Летонька
         # Захардкодил на случай кодеров, что с помощью своих версий скриптов для замены интерфейса меняют их на свои до отработки этого скрипта для замены интерфейса, чтобы точно заменились на стандартные  
@@ -41,7 +41,7 @@ init -1 python:
         ORIGINAL_CURSOR_PATH = "images/misc/mouse/1.png"
         ORIGINAL_MENU_MUSIC = "sound/music/blow_with_the_fires.ogg"
         
-        # Экраны для замены (удалите ненужные)
+        # Экраны для замены
         DEFAULT_SCREENS = [
             "main_menu",
             "game_menu_selector",
@@ -181,8 +181,10 @@ init -1 python:
             """
             try:
                 config.window_title = self.config.MOD_NAME
-                renpy.config.mouse_displayable = MouseDisplayable(self.config.MOD_CURSOR_PATH, 0, 0)
-                config.main_menu_music = self.config.MOD_MENU_MUSIC
+                if self.config.MOD_CURSOR_PATH:
+                    renpy.config.mouse_displayable = MouseDisplayable(self.config.MOD_CURSOR_PATH, 0, 0)
+                if self.config.MOD_MENU_MUSIC:
+                    config.main_menu_music = self.config.MOD_MENU_MUSIC
                 self.logger.debug("Конфигурация мода применена")
             except Exception as e:
                 self.logger.error(u"Ошибка применения конфигурации мода: {}".format(e))
