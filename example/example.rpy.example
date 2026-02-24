@@ -1,40 +1,54 @@
 init python:
     # Кастомный конфиг на основе шаблона
-    class CustomConfigForModScreenManager(ModScreenManagerConfig):
+    class my_mod_ModScreenManagerConfig(ModScreenManagerConfig):
         # Переопределяем параметры
+        # Для опциональных параметров можем указать "" или False, если не хотим менять
+    
+        # Имя мода
+        # БЕЗ ШРИФТОВ, ЦВЕТА И ПРОЧИХ ТЕГОВ
         MOD_NAME = u"Менеджер экранов"
+
+        # Имя мода в сохранении (опционально)
+        # НЕ ДОБАВЛЯЕТСЯ АВТОМАТИЧЕСКИ В СОХРАНЕНИЕ МОДА
+        # нужно руками вносить через my_mod_ModScreenManagerConfig.MOD_SAVE_IDENTIFIER
+        # или просто руками каждый раз вводить 
         MOD_SAVE_IDENTIFIER = "Тест замены интерфейса с помощью менеджера экранов"
+
+        # Замена имени окна БЛ на имя своего мода (опционально)
+        MOD_REPLACE_WINDOW_NAME = False
+
+        # Свой курсор (опционально)
+        MOD_CURSOR_PATH = "ESModScreenManager/images/1.png"
         
-        # # Свой курсор
-        # MOD_CURSOR_PATH = "ESModScreenManager/images/1.png"
-        
-        # # Свой трек в главном меню
-        # MOD_MENU_MUSIC = "ESModScreenManager/music/main_menu.mp3"
+        # Свой трек в главном меню (опционально)
+        MOD_MENU_MUSIC = "ESModScreenManager/music/main_menu.mp3"
         
         # Выбираем только нужные экраны
         DEFAULT_SCREENS = [
-            "main_menu",
-            "game_menu_selector",
-            "quit",
-            "say",
-            "preferences",
-            "save",
-            "load",
-            "nvl",
-            "choice",
-            "text_history_screen",
-            "yesno_prompt",
-            "skip_indicator",
-            "history",
-            "help",
+            "main_menu", # Главное меню
+            "game_menu_selector", # Быстрое меню (на ПКМ/Esc)
+            "say", # Диалоговое окно
+            "nvl", # NVL диалоговое окно
+            "preferences", # Настройки
+            "save", # Сохранение
+            "load", # Загрузка
+            "choice", # Выбор
+            "text_history_screen", # Экран истории
+            "history", # Экран концовок (Сова в главном меню БЛ)
+            "yesno_prompt", # Экран подтверждения действия (при выходе из игры/загрузке сохранения и т.п.)
+            "skip_indicator", # Индикатор пропуска (при зажатом CTRL, например)
+            "help", # Помощь
+            "quit", # Выход
         ]
         
-        # логирование
-        ENABLE_LOGGING = False
+        # включить/выключить логирование в консоль Ren'Py (опционально)
+        LOGGING = False
+        # Уровень логирования (опционально)
+        LOG_LEVEL = 20 # INFO
 init:
-    $ mods["mod_screen_manager_init"] = u"Менеджер экранов"
+    $ mods["mod_screen_manager_init"] = "Менеджер экранов"
     # Создаем глобальный экземпляр менеджера с нашим кастомным шаблоном
-    $ my_mod_screen_manager = ModScreenManager(CustomConfigForModScreenManager)
+    $ my_mod_screen_manager = ModScreenManager(my_mod_ModScreenManagerConfig)
 
 default persistent.timeofday = 'day'
 
@@ -45,13 +59,13 @@ label mod_screen_manager_init:
     
     $ save_name = "Менеджер экранов"#"Тест замены интерфейса с помощью менеджера экранов"
     # или, если Вы боитесь забыть об указании идентификатора или имени мода, то можно сделать так:
-    #$ save_name = MyCustomConfig.MOD_SAVE_IDENTIFIER
+    #$ save_name = my_mod_ModScreenManagerConfig.MOD_SAVE_IDENTIFIER
     # или
-    #$ save_name = MyCustomConfig.MOD_NAME
+    #$ save_name = my_mod_ModScreenManagerConfig.MOD_NAME
     # если надо добавить ещё какой-то текст для например обозначения дня, то
-    #$ save_name = MyCustomConfig.MOD_SAVE_IDENTIFIER + "Любой текст, который вы хотите"
+    #$ save_name = my_mod_ModScreenManagerConfig.MOD_SAVE_IDENTIFIER + "Любой текст, который вы хотите"
     # или
-    #$ save_name = MyCustomConfig.MOD_NAME + "Любой текст, который вы хотите"
+    #$ save_name = my_mod_ModScreenManagerConfig.MOD_NAME + "Любой текст, который вы хотите"
     # так он всегда будет в Вашем имени сохранения
 
     jump mod_screen_manager_test
@@ -62,29 +76,31 @@ label mod_screen_manager_test:
     menu mod_screen_manager_test_main_menu:
         "{size=+10}{b}МЕНЕДЖЕР ЭКРАНОВ{/b}{/size}\n\nВыберите режим тестирования:"
         
-        "1. Управление модом (вкл/выкл)":
+        "Управление модом (вкл/выкл)":
             jump mod_screen_manager_test_mod_control
         
-        "2. Частичная замена экранов":
+        "Частичная замена экранов":
             jump mod_screen_manager_test_partial_replacement
         
-        "3. Тест отдельных экранов":
+        "Тест отдельных экранов":
             jump mod_screen_manager_test_individual_screens
         
-        "4. Быстрый тест всех экранов":
+        "Быстрый тест всех экранов":
             jump mod_screen_manager_quick_test_all_screens
         
-        "5. Диагностика системы":
+        "Диагностика системы" if my_mod_ModScreenManagerConfig.LOGGING:
             jump mod_screen_manager_test_diagnostics
         
-        "6. Демонстрация интерфейса":
+        "Демонстрация интерфейса":
             jump mod_screen_manager_demo_interface
         
         "Выход":
             jump mod_screen_manager_exit
 
 label mod_screen_manager_exit:
-    $ my_mod_screen_manager.deactivate_screens() # Обязательно отключаем наши экраны при выходе из мода, будь то просто добавив функцию на кнопку выхода или при завершении мода через вызов функции
+    # Обязательно отключаем наши экраны при выходе из мода
+    # Будь то просто добавив функцию на кнопку выхода или при завершении мода через вызов функции в, например, экране Quit или yesno_prompt
+    $ my_mod_screen_manager.deactivate_screens()
     return
 
 label mod_screen_manager_test_mod_control:
@@ -201,6 +217,10 @@ label mod_screen_manager_test_individual_screens:
         "История текста":
             call screen my_mod_text_history_screen
             jump mod_screen_manager_individual_screens_menu
+
+        "Концовки":
+            call screen my_mod_history
+            jump mod_screen_manager_individual_screens_menu
         
         "Помощь":
             call screen my_mod_help
@@ -213,12 +233,6 @@ label mod_screen_manager_test_individual_screens:
         "Музыкальная комната":
             call screen my_mod_music_room
             jump mod_screen_manager_individual_screens_menu
-        
-        "Тест диалога":
-            jump mod_screen_manager_test_dialogue
-        
-        "Тест выбора":
-            jump mod_screen_manager_test_choice
         
         "Назад":
             jump mod_screen_manager_test_main_menu
@@ -284,7 +298,7 @@ label mod_screen_manager_test_diagnostics:
         status = manager.get_status()
         
         missing_screens = []
-        for screen_name in CustomConfigForModScreenManager.DEFAULT_SCREENS:
+        for screen_name in my_mod_ModScreenManagerConfig.DEFAULT_SCREENS:
             mod_screen = "my_mod_{}".format(screen_name)
             if not manager._screen_exists(mod_screen):
                 missing_screens.append(screen_name)
@@ -309,7 +323,7 @@ label mod_screen_manager_test_diagnostics:
             for screen in missing_screens:
                 report += u"  - my_mod_{}\n".format(screen)
     
-    $ manager.logger.info(u"\n" + report)
+    $ manager.logger.debug(u"\n" + report)
 
     "Результат диагностики экспортирован в консоль Ren'Py!"
     

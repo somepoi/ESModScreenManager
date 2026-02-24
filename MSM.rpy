@@ -1,28 +1,5 @@
 init -1 python:
     import builtins
-    
-    # На будущее, кастомный форматтер вывода логгера в консоль cmd
-    # Важно: в консоли RenPy цвета фиксированны, т.е. код замены цветов в нём отображается текстом, он не меняет цвет
-    # class CustomFormatter(logging.Formatter):
-
-    #     grey = "\x1b[38;20m"
-    #     yellow = "\x1b[33;20m"
-    #     red = "\x1b[31;20m"
-    #     bold_red = "\x1b[31;1m"
-    #     reset = "\x1b[0m"
-    #     format = "[%(levelname)s] %(name)s: %(message)s"
-
-    #     FORMATS = {
-    #         logging.DEBUG: yellow + format + reset,
-    #         logging.INFO: grey + format + reset,
-    #         logging.WARNING: red + format + reset,
-    #         logging.ERROR: bold_red + format + reset,
-    #     }
-
-    #     def format(self, record):
-    #         log_fmt = self.FORMATS.get(record.levelno)
-    #         formatter = logging.Formatter(log_fmt)
-    #         return formatter.format(record)
 
     class ModScreenManagerConfig:
         """Конфигурация параметров мода."""
@@ -30,14 +7,17 @@ init -1 python:
         MOD_NAME = u"Мой мод"  # Название вашего мода
         MOD_SAVE_IDENTIFIER = "MyMod"  # Идентификатор в названии сохранения
         RENPY_MIN_VERSION = "7.0"  # Минимальная совместимая версия Ren'Py
-        
+
+        # Замена имени окна БЛ на имя своего мода
+        MOD_REPLACE_WINDOW_NAME = False
+
         # Пути к ресурсам
         MOD_CURSOR_PATH = False
         MOD_MENU_MUSIC = False
         
         # Оригинальные настройки Летонька
-        # Захардкодил на случай кодеров, что с помощью своих версий скриптов для замены интерфейса меняют их на свои до отработки этого скрипта для замены интерфейса, чтобы точно заменились на стандартные  
-        ORIGINAL_TITLE = u"Бесконечное лето"
+        # Захардкодил на случай кодеров, которые с помощью своих версий скриптов для замены интерфейса меняют их на свои до отработки этого скрипта для замены интерфейса, чтобы точно заменились на стандартные  
+        ORIGINAL_NAME = u"Бесконечное лето"
         ORIGINAL_CURSOR_PATH = "images/misc/mouse/1.png"
         ORIGINAL_MENU_MUSIC = "sound/music/blow_with_the_fires.ogg"
         
@@ -53,15 +33,15 @@ init -1 python:
             "nvl",
             "choice",
             "text_history_screen",
+            "history",
             "yesno_prompt",
             "skip_indicator",
-            "history",
             "help",
         ]
         
         # логгер
-        ENABLE_LOGGING = True
-        LOG_LEVEL = 20  # INFO
+        LOGGING = False
+        LOG_LEVEL = 10  # DEBUG
     
     class ModScreenManager:
         """
@@ -89,8 +69,8 @@ init -1 python:
             logger_name = u'ModScreenManager [{}]'.format(self.config.MOD_NAME)
             self.logger = ModScreenManagerLogger(
                 name=logger_name,
-                level=self.config.LOG_LEVEL if self.config.ENABLE_LOGGING else ModScreenManagerLogger.ERROR + 10,
-                enabled=self.config.ENABLE_LOGGING
+                level=self.config.LOG_LEVEL if self.config.LOGGING else ModScreenManagerLogger.ERROR + 10,
+                enabled=self.config.LOGGING
             )
 
         def check_compatibility(self):
@@ -163,11 +143,13 @@ init -1 python:
             """
             try:
                 if self.original_config:
-                    config.window_title = self.original_config['window_title']
+                    if self.config.MOD_REPLACE_WINDOW_NAME:
+                        config.window_title = self.original_config['window_title']
                     renpy.config.mouse_displayable = None
                     config.main_menu_music = self.original_config['main_menu_music']
                 else:
-                    config.window_title = self.config.ORIGINAL_TITLE
+                    if self.config.MOD_REPLACE_WINDOW_NAME:
+                        config.window_title = self.config.ORIGINAL_NAME
                     renpy.config.mouse_displayable = None
                     config.main_menu_music = self.config.ORIGINAL_MENU_MUSIC
                     
@@ -180,7 +162,8 @@ init -1 python:
             Применение конфигурации мода.
             """
             try:
-                config.window_title = self.config.MOD_NAME
+                if self.config.MOD_REPLACE_WINDOW_NAME:
+                    config.window_title = self.config.MOD_NAME
                 if self.config.MOD_CURSOR_PATH:
                     renpy.config.mouse_displayable = MouseDisplayable(self.config.MOD_CURSOR_PATH, 0, 0)
                 if self.config.MOD_MENU_MUSIC:
@@ -222,7 +205,7 @@ init -1 python:
                     self.logger.error(u"Ошибка сохранения экрана '{}': {}".format(name, e))
 
             if saved_count > 0:
-                self.logger.info(u"Сохранено {} экранов".format(saved_count))
+                self.logger.debug(u"Сохранено {} экранов".format(saved_count))
             else:
                 self.logger.debug(u"Все экраны уже были сохранены ранее")
             return True  # Возвращаем True если нет ошибок, даже если ничего не сохранили
@@ -287,7 +270,7 @@ init -1 python:
             if activated_count > 0:
                 self._apply_mod_config()
                 self.is_active = True
-                self.logger.info(u"Активировано {} экранов".format(activated_count))
+                self.logger.debug(u"Активировано {} экранов".format(activated_count))
                 
             return activated_count > 0
         
@@ -327,7 +310,7 @@ init -1 python:
                 self._restore_config()
                 self.is_active = False
                 
-            self.logger.info(u"Восстановлено {} экранов".format(restored_count))
+            self.logger.debug(u"Восстановлено {} экранов".format(restored_count))
             return restored_count > 0
         
         def toggle_screen(self, screen_name):
@@ -369,7 +352,7 @@ init -1 python:
                 global save_name
                 if (self.config.MOD_SAVE_IDENTIFIER in save_name) or (self.config.MOD_NAME in save_name):
                     self.activate_screens()
-                    self.logger.info("Мод активирован после загрузки")
+                    self.logger.debug("Мод активирован после загрузки")
             except NameError:
                 # save_name может быть не определен
                 self.logger.error("save_name не определен")

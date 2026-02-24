@@ -1,7 +1,9 @@
-# Пример кастомных экранов
+# Примеры кастомных экранов
+# ЗАМЕНЯЙТЕ НА СВОИ
+# INIT БЛОК ОПЦИОНАЛЕН, ИСПОЛЬЗУЕТСЯ ДЛЯ ПОКРАСКИ КОДОМ КНОПОК ПОД ВРЕМЯ СУТОК
 
 init python:
-    mod_screen_manager_interface_color_schemes = {
+    my_mod_interface_color_schemes = {
         'day': {
             'bg': '#87CEEB',
             'box': '#F0E68C',
@@ -36,9 +38,9 @@ init python:
         }
     }
     
-    def mod_screen_manager_interface_get_color_scheme():
+    def my_mod_interface_get_color_scheme():
         timeofday = getattr(persistent, 'timeofday', 'day')
-        return mod_screen_manager_interface_color_schemes.get(timeofday, mod_screen_manager_interface_color_schemes['day'])
+        return my_mod_interface_color_schemes.get(timeofday, my_mod_interface_color_schemes['day'])
 
 screen my_mod_main_menu():
     tag menu
@@ -159,7 +161,7 @@ screen my_mod_game_menu_selector():
     modal True
     
     python:
-        scheme = mod_screen_manager_interface_get_color_scheme()
+        scheme = my_mod_interface_get_color_scheme()
     
     button:
         background Solid("#00000080")
@@ -255,7 +257,7 @@ screen my_mod_choice(items):
     modal True
     
     python:
-        scheme = mod_screen_manager_interface_get_color_scheme()
+        scheme = my_mod_interface_get_color_scheme()
     
     add Solid("#00000060")
     
@@ -296,7 +298,7 @@ screen my_mod_choice(items):
 screen my_mod_say(who, what, **kwargs):
     
     python:
-        scheme = mod_screen_manager_interface_get_color_scheme()
+        scheme = my_mod_interface_get_color_scheme()
     
     window:
         id "window"
@@ -397,7 +399,7 @@ screen my_mod_say(who, what, **kwargs):
 screen my_mod_nvl(dialogue, items=None):
     
     python:
-        scheme = mod_screen_manager_interface_get_color_scheme()
+        scheme = my_mod_interface_get_color_scheme()
     
     window:
         background Frame(Solid(scheme['box'] + "E0"), 30, 30)
@@ -507,7 +509,7 @@ screen my_mod_notify(message):
     zorder 100
     
     python:
-        scheme = mod_screen_manager_interface_get_color_scheme()
+        scheme = my_mod_interface_get_color_scheme()
     
     if not config.skipping:
         frame:
@@ -529,7 +531,7 @@ screen my_mod_text_history_screen():
     modal True
     
     python:
-        scheme = mod_screen_manager_interface_get_color_scheme()
+        scheme = my_mod_interface_get_color_scheme()
     
     button:
         background Solid("#00000080")
@@ -601,11 +603,134 @@ screen my_mod_text_history_screen():
                 action Return()
                 xalign 0.5
 
+screen my_mod_history():
+    tag menu
+    modal True
+    
+    python:
+        scheme = my_mod_interface_get_color_scheme()
+        
+        screen_endings = [
+            ("Хорошая концовка 1", True, "ending_good_1", "epilogue_1"),
+            ("Плохая концовка 1", False, "ending_bad_1", "epilogue_bad_1"),
+            ("Хорошая концовка 2", True, "ending_good_2", "epilogue_2"),
+            ("Плохая концовка 2", False, "ending_bad_2", "epilogue_bad_2"),
+            ("Секретная концовка", False, "ending_secret", "epilogue_secret"),
+        ]
+        
+        void = "??????????"
+    
+    window:
+        background Solid(scheme['bg'])
+        
+        hbox:
+            xalign 0.5
+            yalign 0.08
+            spacing 10
+            
+            add Solid(scheme['accent']):
+                xsize 20
+                ysize 20
+                yalign 0.65
+            
+            text " КОНЦОВКИ ":
+                size 48
+                color scheme['text']
+                bold True
+                yalign 0.5
+            
+            add Solid(scheme['accent']):
+                xsize 20
+                ysize 20
+                yalign 0.65
+        
+        textbutton "Назад":
+            background Solid(scheme['button'])
+            hover_background Solid(scheme['button_hover'])
+            xalign 0.015
+            yalign 0.92
+            xsize 150
+            ysize 50
+            text_color "#FFFFFF"
+            text_size 24
+            text_xalign 0.5
+            text_yalign 0.5
+            action Return()
+        
+        side "c b r":
+            area (0.23, 0.15, 0.61, 0.75)
+            
+            viewport id "history":
+                draggable True
+                mousewheel True
+                scrollbars None
+                
+                grid 2 len(screen_endings):
+                    spacing 20
+                    
+                    for name, val, ach, lbl in screen_endings:
+                        if val:
+                            textbutton name:
+                                xsize 500
+                                ysize 60
+                                background Solid(scheme['button'])
+                                hover_background Solid(scheme['button_hover'])
+                                text_size 28
+                                text_color "#FFFFFF"
+                                text_xalign 0.5
+                                text_yalign 0.5
+                                action NullAction()
+                        else:
+                            text void:
+                                size 28
+                                color scheme['text']
+                                xalign 0.0
+                                yalign 0.5
+                        
+                        if val:
+                            frame:
+                                background Frame(Solid(scheme['accent'] + "80"), 5, 5)
+                                xsize 150
+                                ysize 150
+                                padding (10, 10)
+                                
+                                text "✓":
+                                    size 80
+                                    color scheme['text']
+                                    xalign 0.5
+                                    yalign 0.5
+                        else:
+                            frame:
+                                background Frame(Solid("#696969"), 5, 5)
+                                xsize 150
+                                ysize 150
+                                padding (10, 10)
+                                
+                                text "?":
+                                    size 80
+                                    color "#808080"
+                                    xalign 0.5
+                                    yalign 0.5
+            
+            bar:
+                value XScrollValue("history")
+                left_bar Solid("#00000000")
+                right_bar Solid("#00000000")
+                thumb Solid("#00000000")
+                hover_thumb Solid("#00000000")
+            
+            vbar:
+                value YScrollValue("history")
+                bottom_bar Frame(Solid("#00000000"), 0, 0)
+                top_bar Frame(Solid("#00000000"), 0, 0)
+                thumb Frame(Solid(scheme['button']), 5, 5)
+                thumb_offset -12
+
 screen my_mod_skip_indicator():
     zorder 100
     
     python:
-        scheme = mod_screen_manager_interface_get_color_scheme()
+        scheme = my_mod_interface_get_color_scheme()
     
     frame:
         background Frame(Solid(scheme['box']), 10, 10)
@@ -635,141 +760,6 @@ screen my_mod_skip_indicator():
                 size 28
                 color scheme['accent']
                 at delayed_blink(0.4, 1.0)
-
-screen my_mod_history():
-    tag menu
-    modal True
-    
-    python:
-        scheme = mod_screen_manager_interface_get_color_scheme()
-    
-    button:
-        background Solid("#00000080")
-        xfill True
-        yfill True
-        action Return()
-    
-    frame:
-        background Frame(Solid(scheme['box']), 20, 20)
-        xalign 0.5
-        yalign 0.5
-        xsize 1600
-        ysize 900
-        padding (40, 40)
-        
-        vbox:
-            spacing 20
-            
-            hbox:
-                xalign 0.5
-                spacing 10
-                add Solid(scheme['accent']):
-                    xsize 20
-                    ysize 20
-                text "ИСТОРИЯ ДИАЛОГОВ":
-                    size 48
-                    color scheme['text']
-                    bold True
-                add Solid(scheme['accent']):
-                    xsize 20
-                    ysize 20
-            
-            null height 10
-            
-            viewport:
-                id "history_viewport"
-                xsize 1520
-                ysize 750
-                scrollbars "vertical"
-                mousewheel True
-                draggable True
-                yinitial 1.0
-                
-                vbox:
-                    spacing 20
-                    
-                    # Проверка наличия истории
-                    python:
-                        history_exists = hasattr(store, '_history_list') and _history_list
-                    
-                    if history_exists:
-                        for h in _history_list:
-                            frame:
-                                background Frame(Solid(scheme['button'] + "40"), 10, 10)
-                                xsize 1500
-                                padding (20, 15)
-                                
-                                hbox:
-                                    spacing 20
-                                    
-                                    if h.who:
-                                        text h.who:
-                                            size 28
-                                            color scheme['accent']
-                                            bold True
-                                            min_width 250
-                                            xalign 0.0
-                                    else:
-                                        null width 250
-                                    
-                                    textbutton h.what:
-                                        background None
-                                        hover_background Frame(Solid(scheme['button_hover'] + "20"), 5, 5)
-                                        action RollbackToIdentifier(h.rollback_identifier)
-                                        text_size 26
-                                        text_color scheme['text']
-                                        text_hover_color scheme['button_hover']
-                                        xmaximum 1200
-                                        text_xalign 0.0
-                                        text_yalign 0.5
-                    else:
-                        frame:
-                            background Frame(Solid(scheme['button'] + "40"), 10, 10)
-                            xalign 0.5
-                            yalign 0.5
-                            padding (40, 40)
-                            
-                            text "История диалогов пуста":
-                                size 32
-                                color scheme['text']
-                                xalign 0.5
-            
-            hbox:
-                spacing 20
-                xalign 0.5
-                
-                textbutton "Прокрутить вверх":
-                    background Solid(scheme['button'])
-                    hover_background Solid(scheme['button_hover'])
-                    xsize 200
-                    ysize 50
-                    text_color "#FFFFFF"
-                    text_size 24
-                    text_xalign 0.5
-                    text_yalign 0.5
-                    action SetScreenVariable("yinitial", 0.0)
-                
-                textbutton "Прокрутить вниз":
-                    background Solid(scheme['button'])
-                    hover_background Solid(scheme['button_hover'])
-                    xsize 200
-                    ysize 50
-                    text_color "#FFFFFF"
-                    text_size 24
-                    text_xalign 0.5
-                    text_yalign 0.5
-                    action SetScreenVariable("yinitial", 1.0)
-                
-                textbutton "Закрыть":
-                    background Solid("#696969")
-                    hover_background Solid("#808080")
-                    xsize 200
-                    ysize 50
-                    text_color "#FFFFFF"
-                    text_size 24
-                    text_xalign 0.5
-                    text_yalign 0.5
-                    action Return()
 
 screen my_mod_save():
     tag menu
@@ -1168,6 +1158,12 @@ screen my_mod_gallery():
     default items_per_page = 12
     default total_items = 24  # Заглушка
     
+    python:
+        import math
+        total_pages = int(math.ceil(float(total_items) / items_per_page))
+        if page >= total_pages:
+            page = max(0, total_pages - 1)
+    
     add Solid("#1C1C1C")
     
     frame:
@@ -1198,36 +1194,41 @@ screen my_mod_gallery():
                     python:
                         item_index = page * items_per_page + i
                         is_unlocked = item_index < 10  # Заглушка для разблокированных
+                        item_exists = item_index < total_items
                     
-                    button:
-                        background Frame(Solid("#4682B4" if is_unlocked else "#2F4F4F"), 5, 5)
-                        hover_background Frame(Solid("#5F9EA0" if is_unlocked else "#404040"), 5, 5)
-                        xsize 370
-                        ysize 210
-                        
-                        vbox:
-                            xalign 0.5
-                            yalign 0.5
-                            spacing 10
+                    if item_exists:
+                        button:
+                            background Frame(Solid("#4682B4" if is_unlocked else "#2F4F4F"), 5, 5)
+                            hover_background Frame(Solid("#5F9EA0" if is_unlocked else "#404040"), 5, 5)
+                            xsize 370
+                            ysize 210
                             
-                            if is_unlocked:
-                                add Solid("#87CEEB"):
-                                    xsize 80
-                                    ysize 80
-                                    xalign 0.5
-                                text "CG {}".format(item_index + 1):
-                                    size 24
-                                    color "#FFFFFF"
-                                    xalign 0.5
-                            else:
-                                add Solid("#696969"):
-                                    xsize 80
-                                    ysize 80
-                                    xalign 0.5
-                                text "Закрыто":
-                                    size 24
-                                    color "#808080"
-                                    xalign 0.5
+                            vbox:
+                                xalign 0.5
+                                yalign 0.5
+                                spacing 10
+                                
+                                if is_unlocked:
+                                    add Solid("#87CEEB"):
+                                        xsize 80
+                                        ysize 80
+                                        xalign 0.5
+                                    text "CG {}".format(item_index + 1):
+                                        size 24
+                                        color "#FFFFFF"
+                                        xalign 0.5
+                                else:
+                                    add Solid("#696969"):
+                                        xsize 80
+                                        ysize 80
+                                        xalign 0.5
+                                    text "Закрыто":
+                                        size 24
+                                        color "#808080"
+                                        xalign 0.5
+                    else:
+                        # Пустая ячейка для несуществующих элементов
+                        null width 370 height 210
             
             hbox:
                 spacing 30
@@ -1247,12 +1248,12 @@ screen my_mod_gallery():
                 else:
                     null width 150
                 
-                text "Страница {}/{}".format(page + 1, (total_items // items_per_page) + 1):
+                text "Страница {}/{}".format(page + 1, total_pages):
                     size 28
                     color "#FFFFFF"
                     yalign 0.5
                 
-                if (page + 1) * items_per_page < total_items:
+                if page < total_pages - 1:
                     textbutton "Вперед >":
                         background Solid("#4682B4")
                         hover_background Solid("#5F9EA0")
@@ -1334,16 +1335,18 @@ screen my_mod_music_room():
                 spacing 20
                 xalign 0.5
                 
-                textbutton "Стоп":
-                    background Solid("#DC143C")
-                    hover_background Solid("#FF0000")
-                    xsize 150
-                    ysize 50
-                    text_color "#FFFFFF"
-                    text_size 24
-                    text_xalign 0.5
-                    text_yalign 0.5
-                    action Stop("music")
+                if renpy.music.is_playing("music"):
+                    textbutton "Стоп":
+                        background Solid("#DC143C")
+                        hover_background Solid("#FF0000")
+                        xsize 150
+                        ysize 50
+                        text_color "#FFFFFF"
+                        text_size 24
+                        text_xalign 0.5
+                        text_yalign 0.5
+                        action Stop("music")
+                        
                 
                 textbutton "Назад":
                     background Solid("#696969")
@@ -1438,7 +1441,7 @@ screen my_mod_quick_menu():
     zorder 100
     
     python:
-        scheme = mod_screen_manager_interface_get_color_scheme()
+        scheme = my_mod_interface_get_color_scheme()
     
     hbox:
         xalign 0.5
