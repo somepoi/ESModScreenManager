@@ -18,10 +18,10 @@ init python:
         MOD_REPLACE_WINDOW_NAME = False
 
         # Свой курсор (опционально)
-        MOD_CURSOR_PATH = "ESModScreenManager/images/1.png"
+        MOD_CURSOR_PATH = False
         
         # Свой трек в главном меню (опционально)
-        MOD_MENU_MUSIC = "ESModScreenManager/music/main_menu.mp3"
+        MOD_MENU_MUSIC = False
         
         # Выбираем только нужные экраны
         DEFAULT_SCREENS = [
