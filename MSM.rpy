@@ -5,6 +5,7 @@ init -1 python:
         """Конфигурация параметров мода."""
         # Основные параметры
         MOD_NAME = u"Мой мод"  # Название вашего мода
+        MOD_ID = "my_mod" # Префикс вашего мода
         MOD_SAVE_IDENTIFIER = "MyMod"  # Идентификатор в названии сохранения
         RENPY_MIN_VERSION = "7.0"  # Минимальная совместимая версия Ren'Py
 
@@ -111,6 +112,21 @@ init -1 python:
             except Exception as e:
                 self.logger.error(u"Ошибка проверки совместимости: {}".format(e))
                 return False
+        
+        def validate_configuration(self):
+            errors = []
+            
+            # game_menu_selector должен быть в DEFAULT_SCREENS. иначе - отъёбываем. Нехуй не отключать свой интерфейс при выходе.
+            if 'game_menu_selector' not in self.config.DEFAULT_SCREENS:
+                errors.append(u"Экран 'game_menu_selector' отсутствует в DEFAULT_SCREENS\nЕго наличие обязательно для отключения интерфейса при выходе из мода")
+            
+            if errors:
+                for error in errors:
+                    self.logger.error(error)
+                return False
+            
+            self.logger.debug(u"Валидация конфигурации пройдена успешно")
+            return True
         
         def _screen_exists(self, screen_name):
             """
@@ -225,6 +241,10 @@ init -1 python:
             """
             if not self.check_compatibility():
                 self.logger.warning("Проверка совместимости не пройдена")
+            
+            if not self.validate_configuration():
+                self.logger.error("Валидация конфигурации не пройдена.")
+                return False
                 
             if screen_names is None:
                 screen_names = self.config.DEFAULT_SCREENS
@@ -251,7 +271,7 @@ init -1 python:
             activated_count = 0
             for name in screen_names:
                 try:
-                    mod_screen_name = "my_mod_{}".format(name)
+                    mod_screen_name = "{}_{}".format(self.config.MOD_ID, name)
                     
                     if self._screen_exists(mod_screen_name):
                         original_key = (name, None)

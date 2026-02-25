@@ -188,12 +188,13 @@ screen my_mod_game_menu_selector():
             
             null height 10
             
+            # ОБЯЗАТЕЛЬНО добавляйте выключение интерфейса при выходе из мода с помощью Function(my_mod_screen_manager.deactivate_screens) в action кнопки для выхода в главное меню игры.
             textbutton "Главное меню":
                 xsize 540
                 ysize 50
                 background Solid(scheme['button'])
                 hover_background Solid(scheme['button_hover'])
-                action MainMenu()
+                action [Function(my_mod_screen_manager.deactivate_screens), MainMenu()]
                 text_size 28
                 text_color "#FFFFFF"
                 text_xalign 0.5
