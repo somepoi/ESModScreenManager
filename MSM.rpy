@@ -331,7 +331,6 @@ init -1 python:
                 self.is_active = False
                 
             self.logger.debug(u"Восстановлено {} экранов".format(restored_count))
-            return restored_count > 0
         
         def toggle_screen(self, screen_name):
             """
