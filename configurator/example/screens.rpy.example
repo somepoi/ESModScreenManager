@@ -1,0 +1,1539 @@
+# Примеры кастомных экранов
+# ЗАМЕНЯЙТЕ НА СВОИ
+# INIT БЛОК ОПЦИОНАЛЕН, ИСПОЛЬЗУЕТСЯ ДЛЯ ПОКРАСКИ КОДОМ КНОПОК ПОД ВРЕМЯ СУТОК
+# НЕ ЗАБУДЬТЕ ЗАМЕНИТЬ my_mod НА ПРЕФИКС СВОЕГО МОДА
+
+init python:
+    my_mod_interface_color_schemes = {
+        'day': {
+            'bg': '#87CEEB',
+            'box': '#F0E68C',
+            'text': '#2F4F4F',
+            'button': '#9ACD32',
+            'button_hover': '#7FFF00',
+            'accent': '#FFD700'
+        },
+        'sunset': {
+            'bg': '#FF6347',
+            'box': '#FFE4B5',
+            'text': '#8B4513',
+            'button': '#FF8C00',
+            'button_hover': '#FFA500',
+            'accent': '#FFD700'
+        },
+        'night': {
+            'bg': '#191970',
+            'box': '#2F4F4F',
+            'text': '#F0F8FF',
+            'button': '#4682B4',
+            'button_hover': '#5F9EA0',
+            'accent': '#87CEEB'
+        },
+        'prologue': {
+            'bg': '#708090',
+            'box': '#D3D3D3',
+            'text': '#2F4F4F',
+            'button': '#B0C4DE',
+            'button_hover': '#ADD8E6',
+            'accent': '#87CEEB'
+        }
+    }
+    
+    def my_mod_interface_get_color_scheme():
+        timeofday = getattr(persistent, 'timeofday', 'day')
+        return my_mod_interface_color_schemes.get(timeofday, my_mod_interface_color_schemes['day'])
+
+screen my_mod_main_menu():
+    tag menu
+    modal True
+    
+    add Solid("#4169E1")
+    
+    frame:
+        background Frame(Solid("#00008B80"), 20, 20)
+        xalign 0.5
+        yalign 0.5
+        padding (40, 40)
+        
+        vbox:
+            spacing 30
+            xalign 0.5
+            yalign 0.5
+            
+            text "ГЛАВНОЕ МЕНЮ":
+                size 60
+                color "#FFD700"
+                xalign 0.5
+                bold True
+                outlines [(3, "#000000", 0, 0)]
+            
+            null height 30
+            
+            vbox:
+                spacing 20
+                xalign 0.5
+                
+                textbutton "НОВАЯ ИГРА":
+                    xsize 500
+                    ysize 60
+                    background Frame(Solid("#228B22"), 10, 10)
+                    hover_background Frame(Solid("#32CD32"), 10, 10)
+                    action Start()
+                    text_size 32
+                    text_color "#FFFFFF"
+                    text_hover_color "#FFFF00"
+                    text_xalign 0.5
+                    text_yalign 0.5
+                
+                textbutton "ЗАГРУЗИТЬ":
+                    xsize 500
+                    ysize 60
+                    background Frame(Solid("#1E90FF"), 10, 10)
+                    hover_background Frame(Solid("#4169E1"), 10, 10)
+                    action ShowMenu('my_mod_load')
+                    text_size 32
+                    text_color "#FFFFFF"
+                    text_hover_color "#FFFF00"
+                    text_xalign 0.5
+                    text_yalign 0.5
+                
+                textbutton "НАСТРОЙКИ":
+                    xsize 500
+                    ysize 60
+                    background Frame(Solid("#9370DB"), 10, 10)
+                    hover_background Frame(Solid("#BA55D3"), 10, 10)
+                    action ShowMenu('my_mod_preferences')
+                    text_size 32
+                    text_color "#FFFFFF"
+                    text_hover_color "#FFFF00"
+                    text_xalign 0.5
+                    text_yalign 0.5
+                
+                textbutton "ГАЛЕРЕЯ":
+                    xsize 500
+                    ysize 60
+                    background Frame(Solid("#FF8C00"), 10, 10)
+                    hover_background Frame(Solid("#FFA500"), 10, 10)
+                    action ShowMenu('my_mod_gallery')
+                    text_size 32
+                    text_color "#FFFFFF"
+                    text_hover_color "#FFFF00"
+                    text_xalign 0.5
+                    text_yalign 0.5
+
+                textbutton "О МОДЕ":
+                    xsize 500
+                    ysize 60
+                    background Frame(Solid("#696969"), 10, 10)
+                    hover_background Frame(Solid("#808080"), 10, 10)
+                    action ShowMenu('my_mod_help')
+                    text_size 32
+                    text_color "#FFFFFF"
+                    text_hover_color "#FFFF00"
+                    text_xalign 0.5
+                    text_yalign 0.5
+                
+                textbutton "СТАНДАРТНЫЙ ИНТЕРФЕЙС":
+                    xsize 500
+                    ysize 60
+                    background Frame(Solid("#696969"), 10, 10)
+                    hover_background Frame(Solid("#808080"), 10, 10)
+                    action [Function(my_mod_screen_manager.deactivate_screens), Function(renpy.full_restart)] # Если хотите, чтобы по выходу из Вашего мода отключался Ваш интерфейс и возвращался оригинальный, не забудьте в Action кнопки для выхода из мода добавить my_mod_screen_manager.deactivate_screens
+                    text_size 32
+                    text_color "#FFFFFF"
+                    text_hover_color "#FFFF00"
+                    text_xalign 0.5
+                    text_yalign 0.5
+                
+                textbutton "ВЫХОД":
+                    xsize 500
+                    ysize 60
+                    background Frame(Solid("#DC143C"), 10, 10)
+                    hover_background Frame(Solid("#FF0000"), 10, 10)
+                    action Quit(confirm=False)
+                    text_size 32
+                    text_color "#FFFFFF"
+                    text_hover_color "#FFFF00"
+                    text_xalign 0.5
+                    text_yalign 0.5
+
+screen my_mod_game_menu_selector():
+    tag menu
+    modal True
+    
+    python:
+        scheme = my_mod_interface_get_color_scheme()
+    
+    button:
+        background Solid("#00000080")
+        xfill True
+        yfill True
+        action Return()
+    
+    frame:
+        background Frame(Solid(scheme['box'] + "F0"), 15, 15)
+        xalign 0.5
+        yalign 0.5
+        xsize 600
+        padding (30, 30)
+        
+        vbox:
+            spacing 20
+            
+            text "МЕНЮ":
+                size 48
+                color scheme['text']
+                xalign 0.5
+                bold True
+            
+            null height 10
+            
+            # ОБЯЗАТЕЛЬНО добавляйте выключение интерфейса при выходе из мода с помощью Function(my_mod_screen_manager.deactivate_screens) в action кнопки для выхода в главное меню игры.
+            textbutton "Главное меню":
+                xsize 540
+                ysize 50
+                background Solid(scheme['button'])
+                hover_background Solid(scheme['button_hover'])
+                action [Function(my_mod_screen_manager.deactivate_screens), MainMenu()]
+                text_size 28
+                text_color "#FFFFFF"
+                text_xalign 0.5
+                text_yalign 0.5
+            
+            textbutton "Сохранить":
+                xsize 540
+                ysize 50
+                background Solid(scheme['button'])
+                hover_background Solid(scheme['button_hover'])
+                action ShowMenu('my_mod_save')
+                text_size 28
+                text_color "#FFFFFF"
+                text_xalign 0.5
+                text_yalign 0.5
+            
+            textbutton "Загрузить":
+                xsize 540
+                ysize 50
+                background Solid(scheme['button'])
+                hover_background Solid(scheme['button_hover'])
+                action ShowMenu('my_mod_load')
+                text_size 28
+                text_color "#FFFFFF"
+                text_xalign 0.5
+                text_yalign 0.5
+            
+            textbutton "Настройки":
+                xsize 540
+                ysize 50
+                background Solid(scheme['button'])
+                hover_background Solid(scheme['button_hover'])
+                action ShowMenu('my_mod_preferences')
+                text_size 28
+                text_color "#FFFFFF"
+                text_xalign 0.5
+                text_yalign 0.5
+            
+            textbutton "Вернуться":
+                xsize 540
+                ysize 50
+                background Solid("#696969")
+                hover_background Solid("#808080")
+                action Return()
+                text_size 28
+                text_color "#FFFFFF"
+                text_xalign 0.5
+                text_yalign 0.5
+
+screen my_mod_quit():
+
+    modal True tag menu
+
+    add "bg black"
+
+    text translation_new["Quit_confirm"] style "settings_link" size 60 text_align 0.5 xalign 0.7 yalign 0.33 color "#031a68" antialias True kerning 2
+
+    textbutton translation_new["Yes"] text_size 70 style "log_button" text_style "settings_link" xalign 0.51 yalign 0.55 text_color "#3b5bc2" text_hover_color "#ff7b02" action Quit(confirm=False)
+    textbutton translation_new["No"] text_size 70 style "log_button" text_style "settings_link" xalign 0.85 yalign 0.55 text_color "#3b5bc2" text_hover_color "#ff7b02" action Return()
+
+screen my_mod_choice(items):
+    modal True
+    
+    python:
+        scheme = my_mod_interface_get_color_scheme()
+    
+    add Solid("#00000060")
+    
+    frame:
+        background Frame(Solid(scheme['box'] + "E0"), 20, 20)
+        xalign 0.5
+        yalign 0.5
+        xmaximum 1200
+        padding (50, 50)
+        
+        vbox:
+            spacing 25
+            xalign 0.5
+            
+            for i, (caption, action, chosen) in enumerate(items):
+                if action:
+                    textbutton caption:
+                        xsize 1100
+                        ysize 70
+                        background Frame(Solid(scheme['button']), 10, 10)
+                        hover_background Frame(Solid(scheme['button_hover']), 10, 10)
+                        selected_background Frame(Solid(scheme['accent']), 10, 10)
+                        action action
+                        text_size 30
+                        text_color scheme['text']
+                        text_hover_color "#FFFFFF"
+                        text_xalign 0.5
+                        text_yalign 0.5
+                        text_outlines [(2, "#000000", 0, 0)]
+                else:
+                    text caption:
+                        size 36
+                        color scheme['text']
+                        xalign 0.5
+                        bold True
+                        text_align 0.5
+
+screen my_mod_say(who, what, **kwargs):
+    
+    python:
+        scheme = my_mod_interface_get_color_scheme()
+    
+    window:
+        id "window"
+        background None
+        
+        frame:
+            background Frame(Solid(scheme['box'] + "D0"), 15, 15)
+            xpos 100
+            ypos 850
+            xsize 1720
+            ysize 200
+            padding (30, 20)
+            
+            vbox:
+                spacing 10
+                
+                if who:
+                    text who:
+                        size 28
+                        color scheme['text']
+                        bold True
+                        outlines [(2, "#000000", 0, 0)]
+                
+                text what:
+                    id "what"
+                    size 26
+                    color scheme['text']
+                    xmaximum 1660
+                    outlines [(1, "#00000080", 0, 0)]
+        
+        hbox:
+            xalign 0.98
+            yalign 0.98
+            spacing 10
+            
+            textbutton "H":
+                background Solid(scheme['button'] + "C0")
+                hover_background Solid(scheme['button_hover'] + "C0")
+                xsize 50
+                ysize 50
+                text_size 24
+                text_color "#FFFFFF"
+                text_xalign 0.5
+                text_yalign 0.5
+                action ShowMenu("my_mod_text_history_screen")
+                tooltip "История"
+            
+            textbutton "S":
+                background Solid(scheme['button'] + "C0")
+                hover_background Solid(scheme['button_hover'] + "C0")
+                xsize 50
+                ysize 50
+                text_size 24
+                text_color "#FFFFFF"
+                text_xalign 0.5
+                text_yalign 0.5
+                action ShowMenu('my_mod_save')
+                tooltip "Сохранить"
+            
+            textbutton "M":
+                background Solid(scheme['button'] + "C0")
+                hover_background Solid(scheme['button_hover'] + "C0")
+                xsize 50
+                ysize 50
+                text_size 24
+                text_color "#FFFFFF"
+                text_xalign 0.5
+                text_yalign 0.5
+                action ShowMenu('my_mod_game_menu_selector')
+                tooltip "Меню"
+            
+            if config.skipping:
+                textbutton "||":
+                    background Solid(scheme['button'] + "C0")
+                    hover_background Solid(scheme['button_hover'] + "C0")
+                    xsize 50
+                    ysize 50
+                    text_size 24
+                    text_color "#FFFFFF"
+                    text_xalign 0.5
+                    text_yalign 0.5
+                    action Skip()
+                    tooltip "Пропуск"
+            else:
+                textbutton ">":
+                    background Solid(scheme['button'] + "C0")
+                    hover_background Solid(scheme['button_hover'] + "C0")
+                    xsize 50
+                    ysize 50
+                    text_size 24
+                    text_color "#FFFFFF"
+                    text_xalign 0.5
+                    text_yalign 0.5
+                    action Skip()
+                    tooltip "Пропуск"
+    use my_mod_quick_menu
+
+screen my_mod_nvl(dialogue, items=None):
+    
+    python:
+        scheme = my_mod_interface_get_color_scheme()
+    
+    window:
+        background Frame(Solid(scheme['box'] + "E0"), 30, 30)
+        xfill True
+        yfill True
+        padding (100, 100)
+        
+        has vbox:
+            spacing 10
+        
+        # Отображение диалогов
+        for who, what, who_id, what_id, window_id in dialogue:
+            hbox:
+                spacing 20
+                
+                if who is not None:
+                    text who:
+                        id who_id
+                        size 28
+                        color scheme['text']
+                        bold True
+                        min_width 200
+                
+                text what:
+                    id what_id
+                    size 26
+                    color scheme['text']
+        
+        # Отображение выборов если есть
+        if items:
+            null height 20
+            
+            vbox:
+                spacing 15
+                
+                for caption, action, chosen in items:
+                    if action:
+                        textbutton caption:
+                            xsize 800
+                            ysize 60
+                            background Solid(scheme['button'])
+                            hover_background Solid(scheme['button_hover'])
+                            action action
+                            text_size 26
+                            text_color "#FFFFFF"
+                            text_xalign 0.5
+                            text_yalign 0.5
+                    else:
+                        text caption:
+                            size 28
+                            color scheme['text']
+                            bold True
+
+screen my_mod_yesno_prompt(message, yes_action, no_action):
+    modal True
+    
+    add Solid("#00000080")
+    
+    frame:
+        background Frame(Solid("#2F4F4F"), 20, 20)
+        xalign 0.5
+        yalign 0.5
+        xsize 700
+        ysize 350
+        padding (40, 40)
+        
+        vbox:
+            spacing 40
+            xalign 0.5
+            yalign 0.5
+            
+            text message:
+                size 32
+                color "#FFFFFF"
+                xalign 0.5
+                text_align 0.5
+                xmaximum 620
+            
+            hbox:
+                spacing 50
+                xalign 0.5
+                
+                textbutton "ДА":
+                    xsize 250
+                    ysize 70
+                    background Solid("#228B22")
+                    hover_background Solid("#32CD32")
+                    action yes_action
+                    text_size 36
+                    text_color "#FFFFFF"
+                    text_xalign 0.5
+                    text_yalign 0.5
+                
+                textbutton "НЕТ":
+                    xsize 250
+                    ysize 70
+                    background Solid("#DC143C")
+                    hover_background Solid("#FF0000")
+                    action no_action
+                    text_size 36
+                    text_color "#FFFFFF"
+                    text_xalign 0.5
+                    text_yalign 0.5
+
+screen my_mod_notify(message):
+    modal False
+    zorder 100
+    
+    python:
+        scheme = my_mod_interface_get_color_scheme()
+    
+    if not config.skipping:
+        frame:
+            background Frame(Solid(scheme['box']), 15, 15)
+            xalign 0.02
+            yalign 0.02
+            padding (30, 20)
+            at notify_appear
+            
+            text message:
+                size 28
+                color scheme['text']
+                xmaximum 400
+    else:
+        timer 0.01 action Hide('my_mod_notify')
+
+screen my_mod_text_history_screen():
+    tag menu
+    modal True
+    
+    python:
+        scheme = my_mod_interface_get_color_scheme()
+    
+    button:
+        background Solid("#00000080")
+        xfill True
+        yfill True
+        action Return()
+    
+    frame:
+        background Frame(Solid(scheme['box']), 20, 20)
+        xalign 0.5
+        yalign 0.5
+        xsize 1600
+        ysize 900
+        padding (40, 40)
+        
+        vbox:
+            spacing 20
+            
+            text "ИСТОРИЯ ДИАЛОГОВ":
+                size 42
+                color scheme['text']
+                bold True
+                xalign 0.5
+            
+            null height 10
+            
+            viewport:
+                id "text_history_viewport"
+                xsize 1520
+                ysize 750
+                scrollbars "vertical"
+                mousewheel True
+                yinitial 1.0
+                
+                vbox:
+                    spacing 15
+                    
+                    for h in _history_list:
+                        hbox:
+                            spacing 20
+                            
+                            if h.who:
+                                text h.who:
+                                    size 26
+                                    color scheme['accent']
+                                    bold True
+                                    min_width 200
+                            else:
+                                null width 200
+                            
+                            textbutton h.what:
+                                background None
+                                hover_background None
+                                action RollbackToIdentifier(h.rollback_identifier)
+                                text_size 24
+                                text_color scheme['text']
+                                text_hover_color scheme['button_hover']
+                                xmaximum 1280
+            
+            textbutton "Закрыть":
+                background Solid("#696969")
+                hover_background Solid("#808080")
+                xsize 200
+                ysize 50
+                text_color "#FFFFFF"
+                text_size 26
+                text_xalign 0.5
+                text_yalign 0.5
+                action Return()
+                xalign 0.5
+
+screen my_mod_history():
+    tag menu
+    modal True
+    
+    python:
+        scheme = my_mod_interface_get_color_scheme()
+        
+        screen_endings = [
+            ("Хорошая концовка 1", True, "ending_good_1", "epilogue_1"),
+            ("Плохая концовка 1", False, "ending_bad_1", "epilogue_bad_1"),
+            ("Хорошая концовка 2", True, "ending_good_2", "epilogue_2"),
+            ("Плохая концовка 2", False, "ending_bad_2", "epilogue_bad_2"),
+            ("Секретная концовка", False, "ending_secret", "epilogue_secret"),
+        ]
+        
+        void = "??????????"
+    
+    window:
+        background Solid(scheme['bg'])
+        
+        hbox:
+            xalign 0.5
+            yalign 0.08
+            spacing 10
+            
+            add Solid(scheme['accent']):
+                xsize 20
+                ysize 20
+                yalign 0.65
+            
+            text " КОНЦОВКИ ":
+                size 48
+                color scheme['text']
+                bold True
+                yalign 0.5
+            
+            add Solid(scheme['accent']):
+                xsize 20
+                ysize 20
+                yalign 0.65
+        
+        textbutton "Назад":
+            background Solid(scheme['button'])
+            hover_background Solid(scheme['button_hover'])
+            xalign 0.015
+            yalign 0.92
+            xsize 150
+            ysize 50
+            text_color "#FFFFFF"
+            text_size 24
+            text_xalign 0.5
+            text_yalign 0.5
+            action Return()
+        
+        side "c b r":
+            area (0.23, 0.15, 0.61, 0.75)
+            
+            viewport id "history":
+                draggable True
+                mousewheel True
+                scrollbars None
+                
+                grid 2 len(screen_endings):
+                    spacing 20
+                    
+                    for name, val, ach, lbl in screen_endings:
+                        if val:
+                            textbutton name:
+                                xsize 500
+                                ysize 60
+                                background Solid(scheme['button'])
+                                hover_background Solid(scheme['button_hover'])
+                                text_size 28
+                                text_color "#FFFFFF"
+                                text_xalign 0.5
+                                text_yalign 0.5
+                                action NullAction()
+                        else:
+                            text void:
+                                size 28
+                                color scheme['text']
+                                xalign 0.0
+                                yalign 0.5
+                        
+                        if val:
+                            frame:
+                                background Frame(Solid(scheme['accent'] + "80"), 5, 5)
+                                xsize 150
+                                ysize 150
+                                padding (10, 10)
+                                
+                                text "✓":
+                                    size 80
+                                    color scheme['text']
+                                    xalign 0.5
+                                    yalign 0.5
+                        else:
+                            frame:
+                                background Frame(Solid("#696969"), 5, 5)
+                                xsize 150
+                                ysize 150
+                                padding (10, 10)
+                                
+                                text "?":
+                                    size 80
+                                    color "#808080"
+                                    xalign 0.5
+                                    yalign 0.5
+            
+            bar:
+                value XScrollValue("history")
+                left_bar Solid("#00000000")
+                right_bar Solid("#00000000")
+                thumb Solid("#00000000")
+                hover_thumb Solid("#00000000")
+            
+            vbar:
+                value YScrollValue("history")
+                bottom_bar Frame(Solid("#00000000"), 0, 0)
+                top_bar Frame(Solid("#00000000"), 0, 0)
+                thumb Frame(Solid(scheme['button']), 5, 5)
+                thumb_offset -12
+
+screen my_mod_skip_indicator():
+    zorder 100
+    
+    python:
+        scheme = my_mod_interface_get_color_scheme()
+    
+    frame:
+        background Frame(Solid(scheme['box']), 10, 10)
+        xalign 0.5
+        yalign 0.98
+        padding (20, 10)
+        
+        hbox:
+            spacing 15
+            
+            text "ПРОПУСК":
+                size 28
+                color scheme['text']
+                bold True
+            
+            text ">":
+                size 28
+                color scheme['accent']
+                at delayed_blink(0.0, 1.0)
+            
+            text ">":
+                size 28
+                color scheme['accent']
+                at delayed_blink(0.2, 1.0)
+            
+            text ">":
+                size 28
+                color scheme['accent']
+                at delayed_blink(0.4, 1.0)
+
+screen my_mod_save():
+    tag menu
+    modal True
+    
+    default selected_slot = 1
+    
+    add Solid("#2F4F4F")
+    
+    frame:
+        background Frame(Solid("#48484880"), 20, 20)
+        xalign 0.5
+        yalign 0.5
+        xsize 1600
+        ysize 900
+        padding (30, 30)
+        
+        vbox:
+            spacing 15
+            
+            hbox:
+                xalign 0.5
+                text "СОХРАНЕНИЕ":
+                    size 48
+                    color "#FFFFFF"
+                    bold True
+            
+            null height 10
+            
+            hbox:
+                spacing 20
+                xalign 0.5
+                
+                textbutton "Сохранить":
+                    background Solid("#228B22")
+                    hover_background Solid("#32CD32")
+                    xsize 200
+                    ysize 50
+                    text_color "#FFFFFF"
+                    text_size 24
+                    text_xalign 0.5
+                    text_yalign 0.5
+                    action FileSave(selected_slot)
+                
+                textbutton "Удалить":
+                    background Solid("#DC143C")
+                    hover_background Solid("#FF0000")
+                    xsize 200
+                    ysize 50
+                    text_color "#FFFFFF"
+                    text_size 24
+                    text_xalign 0.5
+                    text_yalign 0.5
+                    action FileDelete(selected_slot)
+            
+            null height 10
+            
+            viewport:
+                xsize 1540
+                ysize 650
+                scrollbars "vertical"
+                mousewheel True
+                
+                grid 3 4:
+                    spacing 20
+                    
+                    for i in range(1, 13):
+                        button:
+                            background Frame(Solid("#1C1C1C" if i != selected_slot else "#4169E1"), 5, 5)
+                            hover_background Frame(Solid("#2F4F4F" if i != selected_slot else "#5B9BD5"), 5, 5)
+                            xsize 490
+                            ysize 150
+                            action SetScreenVariable("selected_slot", i)
+                            
+                            vbox:
+                                spacing 5
+                                xalign 0.5
+                                yalign 0.5
+                                
+                                text "Слот {}".format(i):
+                                    size 28
+                                    color "#FFD700"
+                                    xalign 0.5
+                                
+                                text FileTime(i, format='%d.%m.%y, %H:%M', empty="Пустой слот"):
+                                    size 22
+                                    color "#FFFFFF"
+                                    xalign 0.5
+                                
+                                text FileSaveName(i):
+                                    size 20
+                                    color "#CCCCCC"
+                                    xalign 0.5
+            
+            textbutton "Назад":
+                background Solid("#696969")
+                hover_background Solid("#808080")
+                xsize 150
+                ysize 50
+                text_color "#FFFFFF"
+                text_size 24
+                text_xalign 0.5
+                text_yalign 0.5
+                action Return()
+
+screen my_mod_load():
+    tag menu
+    modal True
+    
+    default selected_slot = 1
+    
+    add Solid("#2F4F4F")
+    
+    frame:
+        background Frame(Solid("#48484880"), 20, 20)
+        xalign 0.5
+        yalign 0.5
+        xsize 1600
+        ysize 900
+        padding (30, 30)
+        
+        vbox:
+            spacing 15
+            
+            hbox:
+                xalign 0.5
+                text "ЗАГРУЗКА":
+                    size 48
+                    color "#FFFFFF"
+                    bold True
+            
+            null height 10
+            
+            hbox:
+                spacing 20
+                xalign 0.5
+                
+                textbutton "Загрузить":
+                    background Solid("#1E90FF")
+                    hover_background Solid("#4169E1")
+                    xsize 200
+                    ysize 50
+                    text_color "#FFFFFF"
+                    text_size 24
+                    text_xalign 0.5
+                    text_yalign 0.5
+                    action FileLoad(selected_slot)
+                
+                textbutton "Удалить":
+                    background Solid("#DC143C")
+                    hover_background Solid("#FF0000")
+                    xsize 200
+                    ysize 50
+                    text_color "#FFFFFF"
+                    text_size 24
+                    text_xalign 0.5
+                    text_yalign 0.5
+                    action FileDelete(selected_slot)
+            
+            null height 10
+            
+            viewport:
+                xsize 1540
+                ysize 650
+                scrollbars "vertical"
+                mousewheel True
+                
+                grid 3 4:
+                    spacing 20
+                    
+                    for i in range(1, 13):
+                        button:
+                            background Frame(Solid("#1C1C1C" if i != selected_slot else "#4169E1"), 5, 5)
+                            hover_background Frame(Solid("#2F4F4F" if i != selected_slot else "#5B9BD5"), 5, 5)
+                            xsize 490
+                            ysize 150
+                            action SetScreenVariable("selected_slot", i)
+                            
+                            vbox:
+                                spacing 5
+                                xalign 0.5
+                                yalign 0.5
+                                
+                                text "Слот {}".format(i):
+                                    size 28
+                                    color "#FFD700"
+                                    xalign 0.5
+                                
+                                text FileTime(i, format='%d.%m.%y, %H:%M', empty="Пустой слот"):
+                                    size 22
+                                    color "#FFFFFF"
+                                    xalign 0.5
+                                
+                                text FileSaveName(i):
+                                    size 20
+                                    color "#CCCCCC"
+                                    xalign 0.5
+            
+            textbutton "Назад":
+                background Solid("#696969")
+                hover_background Solid("#808080")
+                xsize 150
+                ysize 50
+                text_color "#FFFFFF"
+                text_size 24
+                text_xalign 0.5
+                text_yalign 0.5
+                action Return()
+
+screen my_mod_preferences():
+    tag menu
+    modal True
+    
+    add Solid("#2F4F4F")
+    
+    frame:
+        background Frame(Solid("#48484880"), 20, 20)
+        xalign 0.5
+        yalign 0.5
+        xsize 1400
+        ysize 900
+        padding (40, 40)
+        
+        vbox:
+            spacing 20
+            
+            hbox:
+                xalign 0.5
+                text "НАСТРОЙКИ":
+                    size 48
+                    color "#FFFFFF"
+                    bold True
+            
+            null height 20
+            
+            viewport:
+                xsize 1320
+                ysize 700
+                scrollbars "vertical"
+                mousewheel True
+                
+                vbox:
+                    spacing 30
+                    
+                    vbox:
+                        spacing 10
+                        
+                        text "Режим отображения":
+                            size 36
+                            color "#FFD700"
+                            bold True
+                        
+                        hbox:
+                            spacing 30
+                            
+                            textbutton "Полный экран":
+                                background Solid("#1E90FF" if _preferences.fullscreen else "#696969")
+                                hover_background Solid("#4169E1")
+                                xsize 300
+                                ysize 50
+                                text_color "#FFFFFF"
+                                text_size 24
+                                text_xalign 0.5
+                                text_yalign 0.5
+                                action Preference("display", "fullscreen")
+                            
+                            textbutton "В окне":
+                                background Solid("#1E90FF" if not _preferences.fullscreen else "#696969")
+                                hover_background Solid("#4169E1")
+                                xsize 300
+                                ysize 50
+                                text_color "#FFFFFF"
+                                text_size 24
+                                text_xalign 0.5
+                                text_yalign 0.5
+                                action Preference("display", "window")
+                    
+                    vbox:
+                        spacing 10
+                        
+                        text "Режим пропуска":
+                            size 36
+                            color "#FFD700"
+                            bold True
+                        
+                        hbox:
+                            spacing 30
+                            
+                            textbutton "Весь текст":
+                                background Solid("#9370DB" if _preferences.skip_unseen else "#696969")
+                                hover_background Solid("#BA55D3")
+                                xsize 300
+                                ysize 50
+                                text_color "#FFFFFF"
+                                text_size 24
+                                text_xalign 0.5
+                                text_yalign 0.5
+                                action Preference("skip", "all")
+                            
+                            textbutton "Только прочитанный":
+                                background Solid("#9370DB" if not _preferences.skip_unseen else "#696969")
+                                hover_background Solid("#BA55D3")
+                                xsize 300
+                                ysize 50
+                                text_color "#FFFFFF"
+                                text_size 24
+                                text_xalign 0.5
+                                text_yalign 0.5
+                                action Preference("skip", "seen")
+                    
+                    vbox:
+                        spacing 10
+                        
+                        text "Громкость музыки":
+                            size 36
+                            color "#FFD700"
+                            bold True
+                        
+                        bar:
+                            value Preference("music volume")
+                            xsize 800
+                            ysize 40
+                            left_bar Frame(Solid("#32CD32"), 5, 5)
+                            right_bar Frame(Solid("#2F4F4F"), 5, 5)
+                            thumb Solid("#FFD700")
+                            thumb_offset 10
+                    
+                    vbox:
+                        spacing 10
+                        
+                        text "Громкость звуков":
+                            size 36
+                            color "#FFD700"
+                            bold True
+                        
+                        bar:
+                            value Preference("sound volume")
+                            xsize 800
+                            ysize 40
+                            left_bar Frame(Solid("#1E90FF"), 5, 5)
+                            right_bar Frame(Solid("#2F4F4F"), 5, 5)
+                            thumb Solid("#FFD700")
+                            thumb_offset 10
+                    
+                    vbox:
+                        spacing 10
+                        
+                        text "Скорость текста":
+                            size 36
+                            color "#FFD700"
+                            bold True
+                        
+                        bar:
+                            value Preference("text speed")
+                            xsize 800
+                            ysize 40
+                            left_bar Frame(Solid("#FF8C00"), 5, 5)
+                            right_bar Frame(Solid("#2F4F4F"), 5, 5)
+                            thumb Solid("#FFD700")
+                            thumb_offset 10
+                    
+                    vbox:
+                        spacing 10
+                        
+                        text "Скорость авто-пропуска":
+                            size 36
+                            color "#FFD700"
+                            bold True
+                        
+                        bar:
+                            value Preference("auto-forward time")
+                            xsize 800
+                            ysize 40
+                            left_bar Frame(Solid("#BA55D3"), 5, 5)
+                            right_bar Frame(Solid("#2F4F4F"), 5, 5)
+                            thumb Solid("#FFD700")
+                            thumb_offset 10
+            
+            textbutton "Назад":
+                background Solid("#696969")
+                hover_background Solid("#808080")
+                xsize 150
+                ysize 50
+                text_color "#FFFFFF"
+                text_size 24
+                text_xalign 0.5
+                text_yalign 0.5
+                action Return()
+                xalign 0.0
+
+screen my_mod_gallery():
+    tag menu
+    modal True
+    
+    default page = 0
+    default items_per_page = 12
+    default total_items = 24  # Заглушка
+    
+    python:
+        import math
+        total_pages = int(math.ceil(float(total_items) / items_per_page))
+        if page >= total_pages:
+            page = max(0, total_pages - 1)
+    
+    add Solid("#1C1C1C")
+    
+    frame:
+        background Frame(Solid("#2F4F4F80"), 20, 20)
+        xalign 0.5
+        yalign 0.5
+        xsize 1600
+        ysize 900
+        padding (30, 30)
+        
+        vbox:
+            spacing 20
+            
+            hbox:
+                xalign 0.5
+                text "ГАЛЕРЕЯ":
+                    size 48
+                    color "#FFFFFF"
+                    bold True
+            
+            null height 20
+            
+            grid 4 3:
+                spacing 20
+                xalign 0.5
+                
+                for i in range(items_per_page):
+                    python:
+                        item_index = page * items_per_page + i
+                        is_unlocked = item_index < 10  # Заглушка для разблокированных
+                        item_exists = item_index < total_items
+                    
+                    if item_exists:
+                        button:
+                            background Frame(Solid("#4682B4" if is_unlocked else "#2F4F4F"), 5, 5)
+                            hover_background Frame(Solid("#5F9EA0" if is_unlocked else "#404040"), 5, 5)
+                            xsize 370
+                            ysize 210
+                            
+                            vbox:
+                                xalign 0.5
+                                yalign 0.5
+                                spacing 10
+                                
+                                if is_unlocked:
+                                    add Solid("#87CEEB"):
+                                        xsize 80
+                                        ysize 80
+                                        xalign 0.5
+                                    text "CG {}".format(item_index + 1):
+                                        size 24
+                                        color "#FFFFFF"
+                                        xalign 0.5
+                                else:
+                                    add Solid("#696969"):
+                                        xsize 80
+                                        ysize 80
+                                        xalign 0.5
+                                    text "Закрыто":
+                                        size 24
+                                        color "#808080"
+                                        xalign 0.5
+                    else:
+                        # Пустая ячейка для несуществующих элементов
+                        null width 370 height 210
+            
+            hbox:
+                spacing 30
+                xalign 0.5
+                
+                if page > 0:
+                    textbutton "< Назад":
+                        background Solid("#4682B4")
+                        hover_background Solid("#5F9EA0")
+                        xsize 150
+                        ysize 50
+                        text_color "#FFFFFF"
+                        text_size 24
+                        text_xalign 0.5
+                        text_yalign 0.5
+                        action SetScreenVariable("page", page - 1)
+                else:
+                    null width 150
+                
+                text "Страница {}/{}".format(page + 1, total_pages):
+                    size 28
+                    color "#FFFFFF"
+                    yalign 0.5
+                
+                if page < total_pages - 1:
+                    textbutton "Вперед >":
+                        background Solid("#4682B4")
+                        hover_background Solid("#5F9EA0")
+                        xsize 150
+                        ysize 50
+                        text_color "#FFFFFF"
+                        text_size 24
+                        text_xalign 0.5
+                        text_yalign 0.5
+                        action SetScreenVariable("page", page + 1)
+                else:
+                    null width 150
+            
+            textbutton "Вернуться в меню":
+                background Solid("#696969")
+                hover_background Solid("#808080")
+                xsize 250
+                ysize 50
+                text_color "#FFFFFF"
+                text_size 24
+                text_xalign 0.5
+                text_yalign 0.5
+                action Return()
+                xalign 0.5
+
+screen my_mod_music_room():
+    tag menu
+    modal True
+    
+    default current_track = 0
+    
+    python:
+        music_list = [
+            ("140 kilograms of sex — Incelthread", "ESModScreenManager/music/main_menu.mp3"),
+        ]
+    
+    add Solid("#1C1C1C")
+    
+    frame:
+        background Frame(Solid("#2F4F4F80"), 20, 20)
+        xalign 0.5
+        yalign 0.5
+        padding (40, 40)
+        
+        vbox:
+            spacing 30
+            hbox:
+                xalign 0.5
+                text "МУЗЫКАЛЬНАЯ КОМНАТА":
+                    size 48
+                    color "#FFFFFF"
+                    bold True
+            
+            null height 20
+            
+            # Список треков
+            viewport:
+                xsize 1120
+                ysize 550
+                scrollbars "vertical"
+                mousewheel True
+                
+                vbox:
+                    spacing 15
+                    
+                    for i, (name, track) in enumerate(music_list):
+                        textbutton name:
+                            xsize 1100
+                            ysize 60
+                            background Solid("#4682B4" if i == current_track else "#2F4F4F")
+                            hover_background Solid("#5F9EA0")
+                            action [SetScreenVariable("current_track", i), Play("music", track)]
+                            text_size 28
+                            text_color "#FFFFFF"
+                            text_xalign 0.5
+                            text_yalign 0.5
+            
+            hbox:
+                spacing 20
+                xalign 0.5
+                
+                if renpy.music.is_playing("music"):
+                    textbutton "Стоп":
+                        background Solid("#DC143C")
+                        hover_background Solid("#FF0000")
+                        xsize 150
+                        ysize 50
+                        text_color "#FFFFFF"
+                        text_size 24
+                        text_xalign 0.5
+                        text_yalign 0.5
+                        action Stop("music")
+                        
+                
+                textbutton "Назад":
+                    background Solid("#696969")
+                    hover_background Solid("#808080")
+                    xsize 150
+                    ysize 50
+                    text_color "#FFFFFF"
+                    text_size 24
+                    text_xalign 0.5
+                    text_yalign 0.5
+                    action Return()
+
+screen my_mod_help():
+    tag menu
+    modal True
+    
+    add Solid("#2F4F4F")
+    
+    frame:
+        background Frame(Solid("#48484880"), 20, 20)
+        xalign 0.5
+        yalign 0.5
+        xsize 1200
+        ysize 800
+        padding (50, 50)
+        
+        vbox:
+            spacing 30
+            
+            text "О МОДЕ":
+                size 54
+                color "#FFD700"
+                bold True
+                xalign 0.5
+            
+            null height 20
+            
+            viewport:
+                xsize 1100
+                ysize 600
+                scrollbars "vertical"
+                mousewheel True
+                
+                vbox:
+                    spacing 20
+                    
+                    text "Название мода:":
+                        size 32
+                        color "#87CEEB"
+                        bold True
+                    
+                    text "Замена интерфейса":
+                        size 28
+                        color "#FFFFFF"
+                    
+                    null height 20
+                    
+                    text "Версия:":
+                        size 32
+                        color "#87CEEB"
+                        bold True
+                    
+                    text "1.0.0":
+                        size 28
+                        color "#FFFFFF"
+                    
+                    null height 20
+                    
+                    text "Описание:":
+                        size 32
+                        color "#87CEEB"
+                        bold True
+                    
+                    text "Заменяет оригинальные экраны БЛ на кастомные.":
+                        size 28
+                        color "#FFFFFF"
+                        xmaximum 1080
+            
+            textbutton "Назад":
+                background Solid("#696969")
+                hover_background Solid("#808080")
+                xsize 200
+                ysize 60
+                text_color "#FFFFFF"
+                text_size 28
+                text_xalign 0.5
+                text_yalign 0.5
+                action Return()
+                xalign 0.5
+
+screen my_mod_quick_menu():
+    zorder 100
+    
+    python:
+        scheme = my_mod_interface_get_color_scheme()
+    
+    hbox:
+        xalign 0.5
+        yalign 0.97
+        spacing 15
+        
+        textbutton "Назад":
+            background Frame(Solid(scheme['button'] + "B0"), 5, 5)
+            hover_background Frame(Solid(scheme['button_hover'] + "B0"), 5, 5)
+            xsize 100
+            ysize 40
+            text_size 20
+            text_color "#FFFFFF"
+            text_xalign 0.5
+            text_yalign 0.5
+            action Rollback()
+        
+        textbutton "История":
+            background Frame(Solid(scheme['button'] + "B0"), 5, 5)
+            hover_background Frame(Solid(scheme['button_hover'] + "B0"), 5, 5)
+            xsize 100
+            ysize 40
+            text_size 20
+            text_color "#FFFFFF"
+            text_xalign 0.5
+            text_yalign 0.5
+            action ShowMenu("my_mod_text_history_screen")
+        
+        textbutton "Пропуск":
+            background Frame(Solid(scheme['button'] + "B0"), 5, 5)
+            hover_background Frame(Solid(scheme['button_hover'] + "B0"), 5, 5)
+            xsize 100
+            ysize 40
+            text_size 20
+            text_color "#FFFFFF"
+            text_xalign 0.5
+            text_yalign 0.5
+            action Skip()
+        
+        textbutton "Авто":
+            background Frame(Solid(scheme['button'] + "B0"), 5, 5)
+            hover_background Frame(Solid(scheme['button_hover'] + "B0"), 5, 5)
+            xsize 100
+            ysize 40
+            text_size 20
+            text_color "#FFFFFF"
+            text_xalign 0.5
+            text_yalign 0.5
+            action Preference("auto-forward", "toggle")
+        
+        textbutton "Сохранить":
+            background Frame(Solid(scheme['button'] + "B0"), 5, 5)
+            hover_background Frame(Solid(scheme['button_hover'] + "B0"), 5, 5)
+            xsize 120
+            ysize 40
+            text_size 20
+            text_color "#FFFFFF"
+            text_xalign 0.5
+            text_yalign 0.5
+            action ShowMenu("my_mod_save")
+        
+        textbutton "Загрузить":
+            background Frame(Solid(scheme['button'] + "B0"), 5, 5)
+            hover_background Frame(Solid(scheme['button_hover'] + "B0"), 5, 5)
+            xsize 120
+            ysize 40
+            text_size 20
+            text_color "#FFFFFF"
+            text_xalign 0.5
+            text_yalign 0.5
+            action ShowMenu("my_mod_load")
+        
+        textbutton "Настройки":
+            background Frame(Solid(scheme['button'] + "B0"), 5, 5)
+            hover_background Frame(Solid(scheme['button_hover'] + "B0"), 5, 5)
+            xsize 120
+            ysize 40
+            text_size 20
+            text_color "#FFFFFF"
+            text_xalign 0.5
+            text_yalign 0.5
+            action ShowMenu("my_mod_preferences")
+        
+        textbutton "Меню":
+            background Frame(Solid(scheme['button'] + "B0"), 5, 5)
+            hover_background Frame(Solid(scheme['button_hover'] + "B0"), 5, 5)
+            xsize 100
+            ysize 40
+            text_size 20
+            text_color "#FFFFFF"
+            text_xalign 0.5
+            text_yalign 0.5
+            action ShowMenu("my_mod_game_menu_selector")
