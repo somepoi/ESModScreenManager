@@ -1,0 +1,79 @@
+# Запускайте в изолированном проекте с двумя версиями MSMа (не забудьте про разные префиксы!!!)
+screen say(who, what):
+    text what id "what"
+
+screen say(who, what):
+    variant "touch"
+    text what id "what"
+
+screen game_menu_selector():
+    textbutton "Return" action Return()
+
+init 900 python hide:
+    import __builtin__
+    registry = renpy.display.screen.screens
+    originals = dict((key, value) for key, value in registry.items()
+                     if key[0] in ("say", "game_menu_selector"))
+    assert type(my_mod_msm_runtime) is __builtin__.dict
+    assert type(my_mod_msm_runtime["active"]) is __builtin__.set
+    assert type(my_mod_msm_runtime["originals"]) is __builtin__.dict
+    assert my_mod_msm_activate_screens(["say"])
+    assert registry["say", "touch"] is registry["my_mod_say", None]
+    assert beta_msm_activate_screens(["choice"])
+    assert my_mod_msm_saved_screens == []
+    assert registry["say", "touch"] is originals["say", "touch"]
+    store.my_mod_msm_saved_screens = ["game_menu_selector", "say"]
+    store.beta_msm_saved_screens = None
+    store.save_name = "my_mod"
+    for callback in config.after_load_callbacks:
+        if hasattr(callback, "es_msm_independent_hooks"):
+            callback()
+    assert registry["say", None] is registry["my_mod_say", None]
+    assert not beta_msm_get_status()["is_active"]
+    store.my_mod_msm_saved_screens = []
+    store.beta_msm_saved_screens = ["game_menu_selector", "choice"]
+    for callback in config.interact_callbacks:
+        if callback.__name__.endswith("_msm_interact_callback"):
+            callback()
+    assert not my_mod_msm_get_status()["is_active"]
+    assert beta_msm_get_status()["is_active"]
+    beta_msm_deactivate_screens()
+    for key, original in originals.items():
+        assert registry[key] is original
+    renpy.display.log.write("MSM ENGINE SMOKE: OK")
+
+label main_menu:
+    return
+
+label start:
+    $ my_mod_msm_activate_screens(["say"])
+    $ renpy.save("independent-smoke")
+    if not renpy.session.get("independent_smoke_loaded", False):
+        $ beta_msm_activate_screens(["choice"])
+        $ renpy.session["independent_smoke_loaded"] = True
+        $ renpy.load("independent-smoke")
+    python hide:
+        assert my_mod_msm_get_status()["active_screens"] == ["game_menu_selector", "say"]
+        assert not beta_msm_get_status()["is_active"]
+        assert renpy.display.screen.screens["say", None] is renpy.display.screen.screens["my_mod_say", None]
+        roots = renpy.game.log.get_roots()
+        assert "store.my_mod_msm_runtime" not in roots
+        assert "store.beta_msm_runtime" not in roots
+        renpy.display.log.write("MSM ENGINE SAVE/LOAD: OK")
+    $ renpy.checkpoint()
+    if not renpy.session.get("independent_smoke_rolled_back", False):
+        $ beta_msm_activate_screens(["choice"])
+        $ renpy.session["independent_smoke_rolled_back"] = True
+        $ renpy.rollback(force=True, checkpoints=1)
+    python hide:
+        assert my_mod_msm_saved_screens == ["game_menu_selector", "say"]
+        assert beta_msm_saved_screens == []
+        # Без UI-интеракции вызываем тот же callback вручную
+        for callback in config.interact_callbacks:
+            if callback.__name__.endswith("_msm_interact_callback"):
+                callback()
+        assert my_mod_msm_get_status()["active_screens"] == ["game_menu_selector", "say"]
+        assert not beta_msm_get_status()["is_active"]
+        my_mod_msm_deactivate_screens()
+        renpy.display.log.write("MSM ENGINE ROLLBACK: OK")
+        renpy.quit()

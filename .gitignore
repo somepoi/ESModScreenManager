@@ -167,12 +167,6 @@ game/ios.txt
 # Development and Testing
 # ============================================================================
 
-# Test files
-test/
-tests/
-*_test.rpy
-*_test.py
-
 # Development notes
 TODO.txt
 NOTES.txt

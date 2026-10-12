@@ -1,0 +1,21 @@
+# Необязательный пример входа в мод.
+# Замените ВСЕ my_mod на уникальный префикс своего мода.
+
+init python:
+    mods["my_mod_start"] = my_mod_msm_config["MOD_NAME"]
+
+label my_mod_start:
+    $ save_name = my_mod_msm_config["MOD_SAVE_IDENTIFIER"]
+    $ my_mod_msm_activate_screens()
+    scene bg black
+    "Кастомный интерфейс включён. Esc открывает меню мода."
+    menu:
+        "Продолжить":
+            "Перед выходом вернём стандартные экраны."
+        "Закончить":
+            pass
+    jump my_mod_exit
+
+label my_mod_exit:
+    $ my_mod_msm_deactivate_screens()
+    return
