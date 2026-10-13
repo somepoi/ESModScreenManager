@@ -64,7 +64,7 @@ python early:
                 if lexer.keyword(_MSMKeywords.SCREENS_ES_ALL):
                     config[_MSM_Aliases.DEFAULT_SCREENS] = _MSMKeywords.SCREENS_ES_ALL
                 elif lexer.match(_MSMKeywords.SUBBLOCK_DELIM):
-                    config[_MSM_Aliases.MOD_NAME] = _msm_parse_default_screens(lexer.subblock_lexer())
+                    config[_MSM_Aliases.DEFAULT_SCREENS] = _msm_parse_default_screens(lexer.subblock_lexer())
                 else:
                     renpy.error("Некорректное определение базовых экранов. Доступен параметр 'es_all' или ручная конфигурация в подблоке.")
                 seen[_MSM_Aliases.DEFAULT_SCREENS] = True
@@ -122,6 +122,9 @@ python early:
 
         screen_manager_config = ModScreenManagerConfig()
 
+        if config[_MSM_Aliases.DEFAULT_SCREENS] == _MSMKeywords.SCREENS_ES_ALL:
+            config[_MSM_Aliases.DEFAULT_SCREENS] = list(screen_manager_config.DEFAULT_SCREENS)
+
         for atribute, value in config.items():
             setattr(screen_manager_config, atribute, value)
         
@@ -130,9 +133,14 @@ python early:
         _msm_defined_managers[data[_MSMKeywords.MANAGER_TAG]] = ModScreenManager(screen_manager_config)
     
     def _msm_eval_optional_data(config):
-        config[_MSM_Aliases.MOD_REPLACE_WINDOW_NAME] = config.get(_MSM_Aliases.MOD_REPLACE_WINDOW_NAME, False)
-        config[_MSM_Aliases.MOD_CURSOR_PATH] = config.get(_MSM_Aliases.MOD_CURSOR_PATH, False)
-        config[_MSM_Aliases.MOD_MENU_MUSIC] = config.get(_MSM_Aliases.MOD_MENU_MUSIC, False)
+        for attribute in (
+                _MSM_Aliases.MOD_REPLACE_WINDOW_NAME,
+                _MSM_Aliases.MOD_CURSOR_PATH,
+                _MSM_Aliases.MOD_MENU_MUSIC):
+            if attribute in config:
+                config[attribute] = renpy.python.py_eval(config[attribute])
+            else:
+                config[attribute] = False
 
     def _msm_eval_logger_data(config):
         logging = config.get(_MSM_Aliases.LOGGING, "False")
@@ -160,13 +168,11 @@ python early:
 
     def msm_execute_screen_manager_savename(data):
         screen_manager = _msm_defined_managers.get(data[_MSMKeywords.MANAGER_TAG], None)
-        save_name = data[_MSM_Aliases.MOD_SAVE_IDENTIFIER]
 
         if screen_manager is None:
             renpy.error("Менеджер экранов с тегом '{}' не найден. Убедитесь, что была создана конфигурация для создания менеджера.".format(data[_MSMKeywords.MANAGER_TAG]))
         
-        if save_name == "save_name":
-            save_name = eval(save_name)
+        save_name = renpy.python.py_eval(data[_MSM_Aliases.MOD_SAVE_IDENTIFIER])
 
         setattr(screen_manager.config, _MSM_Aliases.MOD_SAVE_IDENTIFIER, save_name)
 
