@@ -188,13 +188,12 @@ screen my_mod_game_menu_selector():
             
             null height 10
             
-            # ОБЯЗАТЕЛЬНО добавляйте выключение интерфейса при выходе из мода с помощью Function(my_mod_screen_manager.deactivate_screens) в action кнопки для выхода в главное меню игры.
             textbutton "Главное меню":
                 xsize 540
                 ysize 50
                 background Solid(scheme['button'])
                 hover_background Solid(scheme['button_hover'])
-                action [Function(my_mod_screen_manager.deactivate_screens), MainMenu()]
+                action Show("my_mod_exit_confirm")
                 text_size 28
                 text_color "#FFFFFF"
                 text_xalign 0.5
@@ -243,6 +242,58 @@ screen my_mod_game_menu_selector():
                 text_color "#FFFFFF"
                 text_xalign 0.5
                 text_yalign 0.5
+
+screen my_mod_exit_confirm():
+    modal True
+    zorder 200
+
+    add Solid("#00000080")
+
+    frame:
+        background Frame(Solid("#2F4F4F"), 20, 20)
+        xalign 0.5
+        yalign 0.5
+        xsize 700
+        ysize 350
+        padding (40, 40)
+
+        vbox:
+            spacing 40
+            xalign 0.5
+            yalign 0.5
+
+            text "Вернуться в главное меню?":
+                size 32
+                color "#FFFFFF"
+                xalign 0.5
+                text_align 0.5
+                xmaximum 620
+
+            hbox:
+                spacing 50
+                xalign 0.5
+
+                textbutton "ДА":
+                    xsize 250
+                    ysize 70
+                    background Solid("#228B22")
+                    hover_background Solid("#32CD32")
+                    action [Hide("my_mod_exit_confirm"), Function(my_mod_screen_manager.deactivate_screens), MainMenu(confirm=False)]
+                    text_size 36
+                    text_color "#FFFFFF"
+                    text_xalign 0.5
+                    text_yalign 0.5
+
+                textbutton "НЕТ":
+                    xsize 250
+                    ysize 70
+                    background Solid("#DC143C")
+                    hover_background Solid("#FF0000")
+                    action Hide("my_mod_exit_confirm")
+                    text_size 36
+                    text_color "#FFFFFF"
+                    text_xalign 0.5
+                    text_yalign 0.5
 
 screen my_mod_quit():
 
@@ -454,57 +505,6 @@ screen my_mod_nvl(dialogue, items=None):
                             size 28
                             color scheme['text']
                             bold True
-
-screen my_mod_yesno_prompt(message, yes_action, no_action):
-    modal True
-    
-    add Solid("#00000080")
-    
-    frame:
-        background Frame(Solid("#2F4F4F"), 20, 20)
-        xalign 0.5
-        yalign 0.5
-        xsize 700
-        ysize 350
-        padding (40, 40)
-        
-        vbox:
-            spacing 40
-            xalign 0.5
-            yalign 0.5
-            
-            text message:
-                size 32
-                color "#FFFFFF"
-                xalign 0.5
-                text_align 0.5
-                xmaximum 620
-            
-            hbox:
-                spacing 50
-                xalign 0.5
-                
-                textbutton "ДА":
-                    xsize 250
-                    ysize 70
-                    background Solid("#228B22")
-                    hover_background Solid("#32CD32")
-                    action yes_action
-                    text_size 36
-                    text_color "#FFFFFF"
-                    text_xalign 0.5
-                    text_yalign 0.5
-                
-                textbutton "НЕТ":
-                    xsize 250
-                    ysize 70
-                    background Solid("#DC143C")
-                    hover_background Solid("#FF0000")
-                    action no_action
-                    text_size 36
-                    text_color "#FFFFFF"
-                    text_xalign 0.5
-                    text_yalign 0.5
 
 screen my_mod_notify(message):
     modal False

@@ -83,7 +83,6 @@ init python:
             "choice", # Выбор
             "text_history_screen", # Экран истории
             "history", # Экран концовок (Сова в главном меню БЛ)
-            "yesno_prompt", # Экран подтверждения действия (при выходе из игры/загрузке сохранения и т.п.)
             "skip_indicator", # Индикатор пропуска (при зажатом CTRL, например)
             "help", # Помощь
             "quit", # Выход
@@ -155,10 +154,15 @@ msm config my_ui:
 
 `game_menu_selector` обязателен.
 
+`yesno_prompt` не заменяется по умолчанию: этот системный экран используется,
+в частности, при перезаписи сохранений и загрузке. Для подтверждения выхода
+из мода пример использует отдельный экран `my_mod_exit_confirm` в
+`game_menu_selector`.
+
 Отключение интерфейса в кнопке выхода в главном меню при использовании CDS:
 
 ```renpy
-action [Function(_msm_defined_managers["my_ui"].deactivate_screens), MainMenu()]
+action Show("my_mod_exit_confirm")
 ```
 
 `window_name`, `cursor` и `menu_music` принимают Python-выражения, включая переменные, строковые пути и `False`.

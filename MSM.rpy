@@ -37,7 +37,6 @@ init -1 python:
             "choice",
             "text_history_screen",
             "history",
-            "yesno_prompt",
             "skip_indicator",
             "help",
         ]

@@ -51,7 +51,7 @@ label mod_screen_manager_test:
 
 label mod_screen_manager_exit:
     # Обязательно отключаем наши экраны при выходе из мода
-    # Будь то просто добавив функцию на кнопку выхода или при завершении мода через вызов функции в, например, экране Quit или yesno_prompt
+    # Для выхода через меню используйте экран my_mod_exit_confirm, при завершении истории выключите интерфейс из лейбла.
     $ my_mod_screen_manager.deactivate_screens()
     return
 
