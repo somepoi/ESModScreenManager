@@ -16,11 +16,25 @@ screen my_mod_game_menu_selector():
             textbutton "Сохранить" action ShowMenu("save")
             textbutton "Загрузить" action ShowMenu("load")
             textbutton "Настройки" action ShowMenu("preferences")
-            # Подтверждение показывается ДО отключения интерфейса.
-            # При отмене остаёмся в моде с его экранами.
             textbutton "Главное меню":
-                action Confirm("Вернуться в главное меню?", [Function(my_mod_msm_deactivate_screens), MainMenu(confirm=False)])
+                action Show("my_mod_exit_confirm")
             textbutton "Вернуться" action Return()
+
+screen my_mod_exit_confirm():
+    modal True
+    zorder 200
+    add Solid("#000000b0")
+    frame:
+        xalign 0.5
+        yalign 0.5
+        padding (40, 30)
+        vbox:
+            spacing 30
+            text "Вернуться в главное меню?" size 32
+            hbox:
+                spacing 40
+                textbutton "Да" action [Hide("my_mod_exit_confirm"), Function(my_mod_msm_deactivate_screens), MainMenu(confirm=False)]
+                textbutton "Нет" action Hide("my_mod_exit_confirm")
 
 screen my_mod_say(who, what, **kwargs):
     window:
@@ -49,23 +63,6 @@ screen my_mod_choice(items):
                 textbutton my_mod_choice_caption action my_mod_choice_action
             else:
                 text my_mod_choice_caption color "#f4c86a" size 32
-
-screen my_mod_yesno_prompt(message, yes_action, no_action):
-    modal True
-    zorder 200
-    add Solid("#000000b0")
-    frame:
-        xalign 0.5
-        yalign 0.5
-        xmaximum 1000
-        padding (40, 30)
-        vbox:
-            spacing 30
-            text message size 32
-            hbox:
-                spacing 40
-                textbutton "Да" action yes_action
-                textbutton "Нет" action no_action
 
 screen my_mod_file_slots(my_mod_file_mode):
     tag menu

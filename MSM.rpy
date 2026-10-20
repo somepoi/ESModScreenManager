@@ -18,7 +18,7 @@ init -1 python:
         "MOD_CURSOR_PATH": False,
         "MOD_MENU_MUSIC": False,
         "DEFAULT_SCREENS": (
-            "game_menu_selector", "say", "choice", "yesno_prompt",
+            "game_menu_selector", "say", "choice",
             "save", "load", "preferences", "skip_indicator",
         ),
         "LOGGING": False,
