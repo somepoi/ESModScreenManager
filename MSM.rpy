@@ -34,8 +34,56 @@ init -1 python:
         config_originals=my_mod_msm_builtins.dict(),
         config_applied=my_mod_msm_builtins.dict(),
         active=my_mod_msm_builtins.set(),
+        cursor_captured=False,
+        cursor_original_defined=False,
+        cursor_original=None,
+        cursor_applied=None,
     )
     my_mod_msm_missing = my_mod_msm_builtins.object()
+    my_mod_msm_cursor_name = "msm_{}_cursor".format(my_mod_msm_config["MOD_ID"])
+
+    def my_mod_msm_apply_cursor():
+        if not my_mod_msm_config["MOD_CURSOR_PATH"]:
+            return
+
+        if not my_mod_msm_runtime["cursor_captured"]:
+            if renpy.version_tuple[:2] >= (7, 4):
+                my_mod_msm_runtime["cursor_original_defined"] = hasattr(renpy.store, "default_mouse")
+                my_mod_msm_runtime["cursor_original"] = getattr(renpy.store, "default_mouse", None)
+            else:
+                mouse_config = config.mouse or {}
+                my_mod_msm_runtime["cursor_original_defined"] = "default" in mouse_config
+                my_mod_msm_runtime["cursor_original"] = mouse_config.get("default")
+            my_mod_msm_runtime["cursor_captured"] = True
+
+        if renpy.version_tuple[:2] >= (7, 4):
+            my_mod_msm_runtime["cursor_applied"] = my_mod_msm_cursor_name
+            renpy.store.default_mouse = my_mod_msm_cursor_name
+        else:
+            my_mod_msm_runtime["cursor_applied"] = [(my_mod_msm_config["MOD_CURSOR_PATH"], 0, 0)]
+            config.mouse["default"] = my_mod_msm_runtime["cursor_applied"]
+
+    def my_mod_msm_restore_cursor():
+        if not my_mod_msm_runtime["cursor_captured"]:
+            return
+
+        if renpy.version_tuple[:2] >= (7, 4):
+            current = getattr(renpy.store, "default_mouse", None)
+            if current == my_mod_msm_runtime["cursor_applied"]:
+                if my_mod_msm_runtime["cursor_original_defined"]:
+                    renpy.store.default_mouse = my_mod_msm_runtime["cursor_original"]
+                elif hasattr(renpy.store, "default_mouse"):
+                    delattr(renpy.store, "default_mouse")
+        elif config.mouse and config.mouse.get("default", my_mod_msm_missing) == my_mod_msm_runtime["cursor_applied"]:
+            if my_mod_msm_runtime["cursor_original_defined"]:
+                config.mouse["default"] = my_mod_msm_runtime["cursor_original"]
+            else:
+                config.mouse.pop("default", None)
+
+        my_mod_msm_runtime["cursor_captured"] = False
+        my_mod_msm_runtime["cursor_original_defined"] = False
+        my_mod_msm_runtime["cursor_original"] = None
+        my_mod_msm_runtime["cursor_applied"] = None
 
     def my_mod_msm_log(level, message):
         if level >= 40 or (my_mod_msm_config["LOGGING"] and level >= my_mod_msm_config["LOG_LEVEL"]):
@@ -82,6 +130,7 @@ init -1 python:
             # Не перезаписываем настройку, уже изменённую другим кодом.
             if getattr(config, name) == my_mod_msm_runtime["config_applied"][name]:
                 setattr(config, name, original)
+        my_mod_msm_restore_cursor()
         my_mod_msm_runtime["config_originals"].clear()
         my_mod_msm_runtime["config_applied"].clear()
 
@@ -91,15 +140,12 @@ init -1 python:
             changes["window_title"] = my_mod_msm_config["MOD_NAME"]
         if my_mod_msm_config["MOD_MENU_MUSIC"]:
             changes["main_menu_music"] = my_mod_msm_config["MOD_MENU_MUSIC"]
-        if my_mod_msm_config["MOD_CURSOR_PATH"]:
-            changes["mouse_displayable"] = renpy.store.MouseDisplayable(
-                my_mod_msm_config["MOD_CURSOR_PATH"], 0, 0
-            )
         for name, value in changes.items():
             if name not in my_mod_msm_runtime["config_originals"]:
                 my_mod_msm_runtime["config_originals"][name] = getattr(config, name)
             my_mod_msm_runtime["config_applied"][name] = value
             setattr(config, name, value)
+        my_mod_msm_apply_cursor()
 
     def my_mod_msm_reset_runtime(screen_names=None):
         names = (my_mod_msm_builtins.set(my_mod_msm_runtime["active"])
@@ -272,3 +318,11 @@ init -1 python:
         config.start_callbacks.append(my_mod_msm_reset_runtime)
     if my_mod_msm_interact_callback not in config.interact_callbacks:
         config.interact_callbacks.append(my_mod_msm_interact_callback)
+
+init 999 python:
+    if my_mod_msm_config["MOD_CURSOR_PATH"]:
+        if config.mouse is None:
+            config.mouse = {}
+        config.mouse[my_mod_msm_cursor_name] = [
+            (my_mod_msm_config["MOD_CURSOR_PATH"], 0, 0)
+        ]

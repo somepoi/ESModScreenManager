@@ -46,6 +46,9 @@ textbutton "Главное меню" action Show("my_mod_exit_confirm")
 | `MOD_MENU_MUSIC` | Путь к музыке главного меню или `False` |
 | `LOGGING`, `LOG_LEVEL` | Логирование в `log.txt` |
 
+`MOD_CURSOR_PATH` задаёт аппаратный курсор Ren'Py. Hotspot находится в левом
+верхнем углу, изображение до 32×32 пикселей поддерживается везде.
+
 Пример содержит `game_menu_selector`, `say`, `choice`, `save`,
 `load`, `preferences`, `skip_indicator` и опциональный `my_mod_file_slots` для кастомизации слотов сейва/загрузки для мода.
 Для остальных экранов добавьте имя в `DEFAULT_SCREENS` по шаблону
