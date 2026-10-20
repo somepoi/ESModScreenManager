@@ -64,6 +64,16 @@ init -1 python:
             self.original_config = {}
             self.active_screens = set()
             self.is_active = False
+            self.cursor_name = "msm_{}_cursor".format(self.config.MOD_ID)
+
+            # config.mouse is a startup setting.
+            # register the hardware cursor while managers are created during init, then select it at runtime through default_mouse on Ren'Py 7.4+.
+            if self.config.MOD_CURSOR_PATH:
+                if renpy.config.mouse is None:
+                    renpy.config.mouse = {}
+                renpy.config.mouse[self.cursor_name] = [
+                    (self.config.MOD_CURSOR_PATH, 0, 0)
+                ]
 
             self.activate_screens_after_load()
 
@@ -148,7 +158,16 @@ init -1 python:
             try:
                 self.original_config = {
                     'window_title': config.window_title,
-                    'main_menu_music': config.main_menu_music
+                    'main_menu_music': config.main_menu_music,
+                    'default_mouse_defined': hasattr(renpy.store, 'default_mouse'),
+                    'default_mouse': getattr(renpy.store, 'default_mouse', None),
+                    'mouse_default_defined': bool(
+                        renpy.config.mouse and 'default' in renpy.config.mouse
+                    ),
+                    'mouse_default': (
+                        renpy.config.mouse.get('default')
+                        if renpy.config.mouse else None
+                    ),
                 }
                 self.logger.debug("Конфигурация сохранена")
             except Exception as e:
@@ -162,17 +181,32 @@ init -1 python:
                 if self.original_config:
                     if self.config.MOD_REPLACE_WINDOW_NAME:
                         config.window_title = self.original_config['window_title']
-                    renpy.config.mouse_displayable = None
+                    self._restore_mouse_cursor()
                     config.main_menu_music = self.original_config['main_menu_music']
                 else:
                     if self.config.MOD_REPLACE_WINDOW_NAME:
                         config.window_title = self.config.ORIGINAL_NAME
-                    renpy.config.mouse_displayable = None
+                    self._restore_mouse_cursor()
                     config.main_menu_music = self.config.ORIGINAL_MENU_MUSIC
                     
                 self.logger.debug("Конфигурация восстановлена")
             except Exception as e:
                 self.logger.error(u"Ошибка восстановления конфигурации: {}".format(e))
+
+        def _restore_mouse_cursor(self):
+            if not self.config.MOD_CURSOR_PATH:
+                return
+
+            if renpy.version_tuple[:2] >= (7, 4):
+                if self.original_config.get('default_mouse_defined'):
+                    renpy.store.default_mouse = self.original_config['default_mouse']
+                elif hasattr(renpy.store, 'default_mouse'):
+                    delattr(renpy.store, 'default_mouse')
+            elif renpy.config.mouse is not None:
+                if self.original_config.get('mouse_default_defined'):
+                    renpy.config.mouse['default'] = self.original_config['mouse_default']
+                else:
+                    renpy.config.mouse.pop('default', None)
         
         def _apply_mod_config(self):
             """
@@ -182,7 +216,13 @@ init -1 python:
                 if self.config.MOD_REPLACE_WINDOW_NAME:
                     config.window_title = self.config.MOD_NAME
                 if self.config.MOD_CURSOR_PATH:
-                    renpy.config.mouse_displayable = MouseDisplayable(self.config.MOD_CURSOR_PATH, 0, 0)
+                    if renpy.version_tuple[:2] >= (7, 4):
+                        renpy.store.default_mouse = self.cursor_name
+                    else:
+                        # default_mouse was introduced in 7.4.
+                        renpy.config.mouse['default'] = [
+                            (self.config.MOD_CURSOR_PATH, 0, 0)
+                        ]
                 if self.config.MOD_MENU_MUSIC:
                     config.main_menu_music = self.config.MOD_MENU_MUSIC
                 self.logger.debug("Конфигурация мода применена")
